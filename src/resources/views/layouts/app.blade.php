@@ -29,7 +29,7 @@
                     @if (Auth::check())
                         <!-- ログインしている場合 -->
                         <li class="header-nav-item">
-                            <form class="header-nav-logout" action="{{ route('logout') }}" method="post">
+                            <form class="header-nav-logout" action="{{ route('authentication.destroy') }}" method="post">
                                 @csrf
                                 <button type="submit">ログアウト</button>
                             </form>
