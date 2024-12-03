@@ -44,7 +44,7 @@
 
                 <!-- 確認用パスワード -->
                 <div class="form-group">
-                    <label for="password-confirm" class="form-label">確認用パスワード</label>
+                    <label for="password-confirm" class="form-label">パスワード確認</label>
                     <input class="form-input" type="password" name="password_confirmation">
                 </div>
 
