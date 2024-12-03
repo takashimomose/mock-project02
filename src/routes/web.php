@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,3 +20,7 @@ Route::get('/register', [RegisterController::class, 'show'])->name('register.sho
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
 Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
+
+Route::get('/login', [AuthenticationController::class, 'show'])->name('authentication.show');
+Route::post('/login', [AuthenticationController::class, 'store'])->name('authentication.store');
+Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('authentication.destroy');
