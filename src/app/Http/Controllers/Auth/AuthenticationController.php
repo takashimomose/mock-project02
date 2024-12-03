@@ -12,6 +12,10 @@ class AuthenticationController extends Controller
 {
     public function show()
     {
+        if (auth()->check()) {
+            return redirect('/attendance'); // ログインしている場合は/attendanceにリダイレクト
+        }
+
         return view('auth.login');
     }
 
