@@ -7,7 +7,6 @@ use App\Http\Requests\AuthenticationRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-
 class AuthenticationController extends Controller
 {
     public function show()
@@ -23,14 +22,11 @@ class AuthenticationController extends Controller
     {
         $credentials = $request->validated();
 
-
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-
             return redirect()->intended('/attendance');
         }
-
 
         return back()->withErrors([
             'email' => 'ログイン情報が登録されていません',
@@ -41,10 +37,8 @@ class AuthenticationController extends Controller
     {
         Auth::logout();
 
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
 
         return redirect('/login');
     }
