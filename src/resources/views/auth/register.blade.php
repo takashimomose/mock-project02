@@ -58,6 +58,7 @@
                 <!-- ログインリンク -->
                 <div class="form-group">
                     <a href="{{ route('authentication.show') }}" class="login-link">ログインはこちら</a>
+                </div>
             </form>
         </section>
     </main>
