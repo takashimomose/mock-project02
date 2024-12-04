@@ -17,7 +17,7 @@
                 <div class="form-group">
                     <label for="name" class="form-label">名前</label>
                     <input class="form-input" type="text" name="name" value="{{ old('name') }}"
-                        placeholder="例: 山田　太郎">
+                        placeholder="例: 山田 太郎">
                     @error('name')
                         <div class="error-message">{{ $message }}</div>
                     @enderror

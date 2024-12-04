@@ -11,8 +11,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
-
-    <!-- 各ページで追加のCSSを読み込む -->
     @stack('css')
 </head>
 
@@ -21,7 +19,10 @@
         <div class="header-wrapper">
             <h1 class="header-logo">
                 <a href="">
-                    <img src="{{ asset('images/logo.svg') }}" class="responsive-logo" alt="CoachTech">
+                    <picture>
+                        <source media="(max-width: 1200px)" srcset="{{ asset('images/logo-tablet.svg') }}">
+                        <img src="{{ asset('images/logo.svg') }}" class="responsive-logo" alt="site logo">
+                    </picture>
                 </a>
             </h1>
             <nav class="header-nav">
