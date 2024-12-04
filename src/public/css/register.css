@@ -44,7 +44,7 @@
     color: #FFF;
     background-color: #000;
     font-family: "Noto Sans JP", sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.625rem;
     border: none;
     font-weight: 700;
     cursor: pointer;
@@ -54,6 +54,6 @@
     text-align: center;
     color: #0073CC;
     text-decoration: none;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     margin-bottom: 20px;
 }
