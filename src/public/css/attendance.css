@@ -1,0 +1,43 @@
+.container {
+    text-align: center;
+    margin-top: 150px;
+}
+
+.status {
+    display: inline-block;
+    background-color: #e0e0e0;
+    color: #666;
+    font-size: 1.125rem;
+    padding: 5px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.date {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.time {
+    font-size: 5rem;
+    font-weight: 700;
+    margin: 0 0 40px 0;
+    color: #000;
+}
+
+.start-btn {
+    background-color: #000;
+    color: #fff;
+    font-size: 2rem;
+    padding: 10px 60px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+.start-btn:hover {
+    color: #000;
+    background-color: #fff;
+}
