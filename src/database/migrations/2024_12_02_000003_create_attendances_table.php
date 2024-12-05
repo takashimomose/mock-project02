@@ -17,10 +17,10 @@ class CreateAttendancesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->date('date');
-            $table->timestamp('start_date');
-            $table->timestamp('end_date')->nullable();
-            $table->timestamp('break_start_date')->nullable();
-            $table->timestamp('break_end_date')->nullable();
+            $table->timestamp('start_time');
+            $table->timestamp('break_start_time')->nullable();
+            $table->timestamp('break_end_time')->nullable();
+            $table->timestamp('end_time')->nullable();
             $table->timestamps();
 
             // 外部キーの設定
