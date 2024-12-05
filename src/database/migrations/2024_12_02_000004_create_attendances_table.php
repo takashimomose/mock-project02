@@ -19,10 +19,12 @@ class CreateAttendancesTable extends Migration
             $table->date('date');
             $table->timestamp('start_time');
             $table->timestamp('end_time')->nullable();
+            $table->unsignedBigInteger('attendance_status_id');
             $table->timestamps();
 
             // 外部キーの設定
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('attendance_status_id')->references('id')->on('attendance_status')->onDelete('cascade');
         });
     }
 
