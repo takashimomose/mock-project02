@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
@@ -25,5 +26,12 @@ class AttendanceController extends Controller
         }
 
         return view('attendance', compact('user', 'workingStatus'));
+    }
+
+    public function store(Request $request)
+    {
+        $workingStatus = 1だったらbuttonのvalueのstart_workを使ってattendancesテーブルのdate, 
+
+        return redirect()->route('attendance.show');
     }
 }

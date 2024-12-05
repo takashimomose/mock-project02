@@ -18,7 +18,7 @@
                         ')' }}
                 </div>
                 <div class="time">{{ \Carbon\Carbon::now()->format('H:i') }}</div>
-                <button type="submit" class="start-btn">出勤</button>
+                <button type="submit" class="start-btn" value="start_work">出勤</button>
             </div>
         </section>
     </main>

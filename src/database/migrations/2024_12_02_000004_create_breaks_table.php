@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAttendancesTable extends Migration
+class CreateBreaksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,15 @@ class CreateAttendancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('breaks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->date('date');
-            $table->timestamp('start_time');
+            $table->unsignedBigInteger('attendance_id');
+            $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
             $table->timestamps();
 
             // 外部キーの設定
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
         });
     }
 
@@ -33,6 +32,6 @@ class CreateAttendancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('breaks');
     }
 }
