@@ -14,8 +14,6 @@ class Attendance extends Model
         'user_id',
         'date',
         'start_time',
-        'break_start_time',
-        'break_end_time',
         'end_time',
     ];
 
@@ -24,5 +22,10 @@ class Attendance extends Model
     {
         return $query->where('user_id', $userId)
                      ->where('date', now()->toDateString());
+    }
+    
+    public function breakTimes()
+    {
+        return $this->hasMany(BreakTime::class, 'attendance_id');
     }
 }

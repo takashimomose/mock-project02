@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
@@ -13,25 +12,22 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $workingStatus = null;
 
-        $attendance = Attendance::todayRecord($user->id)->first();
+        $attendance = Attendance::todayRecord($user->id)->first(); // 今日の出勤レコードを取得
 
         if (!$attendance) {
-            $workingStatus = 1;
-        } elseif ($attendance->start_time !== null && $attendance->break_start_time === null) {
-            $workingStatus = 2;
-        } elseif ($attendance->break_start_time !== null && $attendance->end_time === null) {
-            $workingStatus = 3;
-        } elseif ($attendance->end_time !== null) {
-            $workingStatus = 4;
+            $workingStatus = 1; // 出勤前
+        } else {
+            $latestBreak = $attendance->breakTimes()->latest()->first();
+
+            if (!$latestBreak || ($latestBreak->start_time === null && $attendance->end_time === null)) {
+                $workingStatus = 2; // 勤務中
+            } elseif ($latestBreak->end_time === null) {
+                $workingStatus = 3; // 休憩中
+            } elseif ($attendance->end_time !== null) {
+                $workingStatus = 4; // 退勤済み
+            }
         }
 
         return view('attendance', compact('user', 'workingStatus'));
-    }
-
-    public function store(Request $request)
-    {
-        $workingStatus = 1だったらbuttonのvalueのstart_workを使ってattendancesテーブルのdate, 
-
-        return redirect()->route('attendance.show');
     }
 }
