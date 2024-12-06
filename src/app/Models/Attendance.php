@@ -19,6 +19,11 @@ class Attendance extends Model
         'attendance_status_id',
     ];
 
+    const STATUS_BEFORE = 1;   // 勤務外
+    const STATUS_WORKING = 2;    // 勤務中
+    const STATUS_BREAK = 3;      // 休憩中
+    const STATUS_FINISHED = 4; // 退勤済
+
     /* 今日の勤怠レコードを取得 */
     public function scopeTodayRecord($query, $userId)
     {
@@ -38,7 +43,7 @@ class Attendance extends Model
             'user_id' => $userId,
             'date' => now()->toDateString(),
             'start_time' => now(),
-            'attendance_status_id' => 2,
+            'attendance_status_id' => self::STATUS_WORKING,
         ]);
     }
 
@@ -48,7 +53,7 @@ class Attendance extends Model
         return self::todayRecord($userId)
             ->update([
                 'end_time' => now(),
-                'attendance_status_id' => 4,
+                'attendance_status_id' => self::STATUS_FINISHED,
             ]);
     }
 
@@ -57,7 +62,7 @@ class Attendance extends Model
     {
         $attendance = self::todayRecord($userId)->first();
         if ($attendance) {
-            $attendance->update(['attendance_status_id' => 3]);
+            $attendance->update(['attendance_status_id' => self::STATUS_BREAK]);
 
             BreakTime::create([
                 'user_id' => $userId,
@@ -72,7 +77,7 @@ class Attendance extends Model
     {
         $attendance = self::todayRecord($userId)->first();
         if ($attendance) {
-            $attendance->update(['attendance_status_id' => 2]);
+            $attendance->update(['attendance_status_id' => self::STATUS_WORKING]);
 
             $attendance->breakTimes()->whereNull('end_time')->update([
                 'end_time' => now(),
