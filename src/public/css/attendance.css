@@ -26,7 +26,7 @@
     color: #000;
 }
 
-.start-btn {
+.start-btn, .end-btn {
     background-color: #000;
     color: #fff;
     font-size: 2rem;
@@ -35,9 +35,36 @@
     cursor: pointer;
     font-family: inherit;
     font-weight: 700;
+    border: none;
 }
 
-.start-btn:hover {
-    color: #000;
+.end-btn {
+    margin-right: 50px;
+}
+
+.start-btn:hover, .end-btn:hover {
+    color: #fff;
+    background-color: #666;
+}
+
+.start-break-btn, .end-break-btn {
     background-color: #fff;
+    color: #000;
+    font-size: 2rem;
+    padding: 10px 60px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+}
+
+.start-break-btn:hover, .end-break-btn:hover {
+    color: #fff;
+    background-color: #666;
+}
+
+.message {
+    font-size: 1.625rem;
+    font-weight: 700;
 }
