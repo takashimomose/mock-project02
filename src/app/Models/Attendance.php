@@ -25,10 +25,11 @@ class Attendance extends Model
     const STATUS_FINISHED = 4; // 退勤済
 
     /* 今日の勤怠レコードを取得 */
-    public function scopeTodayRecord($query, $userId)
+    public function getTodayRecord($userId)
     {
-        return $query->where('user_id', $userId)
-            ->where('date', now()->toDateString());
+        return self::where('user_id', $userId)
+            ->where('date', now()->toDateString())
+            ->first();
     }
 
     public function breakTimes()
@@ -50,7 +51,7 @@ class Attendance extends Model
     /* 退勤記録を更新 */
     public static function endWork($userId)
     {
-        return self::todayRecord($userId)
+        return self::getTodayRecord($userId)
             ->update([
                 'end_time' => now(),
                 'attendance_status_id' => self::STATUS_FINISHED,
@@ -60,7 +61,7 @@ class Attendance extends Model
     /* 休憩開始の処理 */
     public static function startBreak($userId)
     {
-        $attendance = self::todayRecord($userId)->first();
+        $attendance = self::getTodayRecord($userId);
         if ($attendance) {
             $attendance->update(['attendance_status_id' => self::STATUS_BREAK]);
 
@@ -75,7 +76,7 @@ class Attendance extends Model
     /* 休憩終了の処理 */
     public static function endBreak($userId)
     {
-        $attendance = self::todayRecord($userId)->first();
+        $attendance = self::getTodayRecord($userId);
         if ($attendance) {
             $attendance->update(['attendance_status_id' => self::STATUS_WORKING]);
 

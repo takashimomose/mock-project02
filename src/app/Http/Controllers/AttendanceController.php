@@ -13,7 +13,7 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $workingStatus = null;
 
-        $attendance = Attendance::todayRecord($user->id)->first(); // 今日の勤怠レコードを取得
+        $attendance = Attendance::getTodayRecord($user->id); // 今日の勤怠レコードを取得
 
         if (!$attendance) {
             $workingStatus = Attendance::STATUS_BEFORE;
