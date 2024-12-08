@@ -7,6 +7,11 @@
 @endpush
 
 @section('content')
+
+    @php
+        use App\Models\Attendance;
+    @endphp
+
     <main class="wrapper">
         <section class="attendance-section">
             <form action="{{ route('attendance.store') }}" method="POST">
@@ -29,14 +34,18 @@
                         ')' }}
                 </div>
                 <div class="time">{{ \Carbon\Carbon::now()->format('H:i') }}</div>
-                @if ($workingStatus === $STATUS_BEFORE)
-                    <button type="submit" class="start-btn" name="start_work" value="{{ $STATUS_WORKING }}">出勤</button>
-                @elseif ($workingStatus === $STATUS_WORKING)
-                    <button type="submit" class="end-btn" name="end_work" value="{{ $STATUS_FINISHED }}">退勤</button>
-                    <button type="submit" class="start-break-btn" name="start_break" value="{{ $STATUS_BREAK }}">休憩入</button>
-                @elseif ($workingStatus === $STATUS_BREAK)
-                    <button type="submit" class="end-break-btn" name="end_break" value="{{ $STATUS_WORKING }}">休憩戻</button>
-                @elseif ($workingStatus === $STATUS_FINISHED)
+                @if ($workingStatus === Attendance::STATUS_BEFORE)
+                    <button type="submit" class="start-btn" name="start_work"
+                        value="{{ Attendance::STATUS_WORKING }}">出勤</button>
+                @elseif ($workingStatus === Attendance::STATUS_WORKING)
+                    <button type="submit" class="end-btn" name="end_work"
+                        value="{{ Attendance::STATUS_FINISHED }}">退勤</button>
+                    <button type="submit" class="start-break-btn" name="start_break"
+                        value="{{ Attendance::STATUS_BREAK }}">休憩入</button>
+                @elseif ($workingStatus === Attendance::STATUS_BREAK)
+                    <button type="submit" class="end-break-btn" name="end_break"
+                        value="{{ Attendance::STATUS_WORKING }}">休憩戻</button>
+                @elseif ($workingStatus === Attendance::STATUS_FINISHED)
                     <p class="message">お疲れ様でした。</p>
                 @endif
             </form>
