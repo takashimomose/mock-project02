@@ -26,7 +26,8 @@
     color: #000;
 }
 
-.start-btn, .end-btn {
+.start-btn,
+.end-btn {
     background-color: #000;
     color: #fff;
     font-size: 2rem;
@@ -42,12 +43,16 @@
     margin-right: 50px;
 }
 
-.start-btn:hover, .end-btn:hover {
+.start-btn:hover,
+.end-btn:hover,
+.start-break-btn:hover,
+.end-break-btn:hover {
     color: #fff;
     background-color: #666;
 }
 
-.start-break-btn, .end-break-btn {
+.start-break-btn,
+.end-break-btn {
     background-color: #fff;
     color: #000;
     font-size: 2rem;
@@ -57,11 +62,6 @@
     font-family: inherit;
     font-weight: 700;
     border: none;
-}
-
-.start-break-btn:hover, .end-break-btn:hover {
-    color: #fff;
-    background-color: #666;
 }
 
 .message {
