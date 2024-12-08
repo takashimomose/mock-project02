@@ -12,13 +12,13 @@
             <form action="{{ route('attendance.store') }}" method="POST">
                 @csrf
                 <div class="status">
-                    @if ($workingStatus === 1)
+                    @if ($workingStatus === $STATUS_BEFORE)
                         勤務外
-                    @elseif ($workingStatus === 2)
+                    @elseif ($workingStatus === $STATUS_WORKING)
                         出勤中
-                    @elseif ($workingStatus === 3)
+                    @elseif ($workingStatus === $STATUS_BREAK)
                         休憩中
-                    @elseif ($workingStatus === 4)
+                    @elseif ($workingStatus === $STATUS_FINISHED)
                         退勤済
                     @endif
                 </div>
