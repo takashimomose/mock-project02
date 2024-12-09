@@ -9,7 +9,7 @@
     padding: 0px 15px;
     font-size: 1.875rem;
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 40px;
     border-left: solid 8px #000;
 }
 
@@ -82,6 +82,8 @@
     padding: 1rem;
     background: #fff;
     border-bottom: solid 2px #f0eff2;
+    color: #737373;
+    font-weight: 700;
 }
 
 .details-link {
