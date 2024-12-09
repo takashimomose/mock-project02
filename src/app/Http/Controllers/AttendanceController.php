@@ -33,11 +33,7 @@ class AttendanceController extends Controller
             }
         }
 
-        return view('attendance', compact('user', 'workingStatus'))
-            ->with('STATUS_BEFORE', Attendance::STATUS_BEFORE)
-            ->with('STATUS_WORKING', Attendance::STATUS_WORKING)
-            ->with('STATUS_BREAK', Attendance::STATUS_BREAK)
-            ->with('STATUS_FINISHED', Attendance::STATUS_FINISHED);
+        return view('attendance', compact('user', 'workingStatus'));
     }
 
     public function store(Request $request)
