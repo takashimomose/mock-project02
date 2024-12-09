@@ -1,0 +1,95 @@
+.attendance-list-section {
+    width: 100%;
+    max-width: 700px;
+    padding: 0 16px;
+    margin: 0 auto;
+}
+
+.attendance-list-section h1 {
+    padding: 0px 15px;
+    font-size: 1.875rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    border-left: solid 8px #000;
+}
+
+.attendance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+    border-radius: 10px;
+    height: 60px;
+}
+
+.prev-btn,
+.next-btn {
+    font-size: 1rem;
+    color: #737373;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.attendance-header .btn:hover {
+    background: #555;
+}
+
+.attendance-header .current-month {
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.calendar-icon {
+    width: 25px;
+    height: 25px;
+    color: #737373;
+    font-style: normal;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: center;
+    font-size: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.attendance-table thead {
+    color: #737373;
+    background: transparent;
+    border-bottom: solid 8px #f0eff2;
+}
+
+.attendance-table th {
+    padding: 1rem;
+    border-bottom: solid 4px #f0eff2;
+    background: #fff;
+}
+
+.attendance-table td {
+    padding: 1rem;
+    background: #fff;
+    border-bottom: solid 2px #f0eff2;
+}
+
+.details-link {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.details-link:hover {
+    text-decoration: underline;
+}

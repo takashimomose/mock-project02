@@ -16,6 +16,7 @@ class Attendance extends Model
         'date',
         'start_time',
         'end_time',
+        'working_hours',
         'attendance_status_id',
     ];
 
@@ -84,5 +85,35 @@ class Attendance extends Model
                 'end_time' => now(),
             ]);
         }
+    }
+
+    /* 月の勤怠データ取得 */
+    public static function getMonthAttendance($userId, $currentMonth)
+    {
+        return self::where('user_id', $userId)
+            ->whereMonth('date', $currentMonth->month)
+            ->whereYear('date', $currentMonth->year)
+            ->get()
+            ->map(function ($attendance) {
+                if (is_null($attendance->start_time)) {
+                    $attendance->start_time = '-';
+                } else {
+                    $attendance->start_time = \Carbon\Carbon::parse($attendance->start_time)->format('H:i');
+                }
+
+                if (is_null($attendance->end_time)) {
+                    $attendance->end_time = '-';
+                } else {
+                    $attendance->end_time = \Carbon\Carbon::parse($attendance->end_time)->format('H:i');
+                }
+
+                if (is_null($attendance->working_hours)) {
+                    $attendance->working_hours = '-';
+                } else {
+                    $attendance->working_hours = \Carbon\Carbon::parse($attendance->working_hours)->format('H:i');
+                }
+
+                return $attendance;
+            });
     }
 }
