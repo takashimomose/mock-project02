@@ -20,6 +20,7 @@ Route::get('/register', [RegisterController::class, 'show'])->name('register.sho
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
 Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
+Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
 
 Route::get('/login', [AuthenticationController::class, 'show'])->name('authentication.show');
 Route::post('/login', [AuthenticationController::class, 'store'])->name('authentication.store');
