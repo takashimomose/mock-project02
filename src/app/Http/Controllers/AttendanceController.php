@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\BreakTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,7 +27,7 @@ class AttendanceController extends Controller
                 case Attendance::STATUS_BREAK:
                     $workingStatus = Attendance::STATUS_BREAK;
                     break;
-                    
+
                 case Attendance::STATUS_FINISHED:
                     $workingStatus = Attendance::STATUS_FINISHED;
                     break;
@@ -55,6 +56,20 @@ class AttendanceController extends Controller
 
             case ($request->input('end_break') == Attendance::STATUS_WORKING):
                 Attendance::endBreak($user->id);
+
+                // 今日の最新の休憩時間を計算
+                $breakTimeDifference = BreakTime::calculateTodayLatestBreakTime($user->id);
+
+                // 今日の最新のレコードをEloquentで取得
+                $latestBreakRecord = BreakTime::whereHas('attendance', function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                        ->whereDate('date', now()->toDateString());
+                })
+                    ->latest('start_time') // 最新のレコードを取得
+                    ->first(); // 最新の1件を取得
+
+                // break_timeを更新
+                $latestBreakRecord->update(['break_time' => $breakTimeDifference]);
                 break;
         }
 

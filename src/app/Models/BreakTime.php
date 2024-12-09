@@ -18,6 +18,23 @@ class BreakTime extends Model
         'break_time',
     ];
 
+    public static function calculateTodayLatestBreakTime($userId)
+    {
+        // 今日の一番新しいレコードをEloquentで取得
+        $latestBreakTime = self::whereHas('attendance', function ($query) use ($userId) {
+            $query->where('user_id', $userId)
+                ->whereDate('date', now()->toDateString()); // 本日の日付
+        })
+            ->latest('start_time') // start_time が一番新しいレコードを取得
+            ->first();
+
+        // start_time と end_time の差分を計算
+        $start = \Carbon\Carbon::parse($latestBreakTime->start_time);
+        $end = \Carbon\Carbon::parse($latestBreakTime->end_time);
+
+        return $end->diffInMinutes($start); // 差分を分単位で返す
+    }
+
     public static function getMonthBreak($userId, $currentMonth)
     {
         return self::whereHas('attendance', function ($query) use ($userId, $currentMonth) {

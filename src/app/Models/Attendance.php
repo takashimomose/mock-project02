@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -20,6 +21,11 @@ class Attendance extends Model
         'attendance_status_id',
     ];
 
+    public function breakTimes()
+    {
+        return $this->hasMany(BreakTime::class, 'attendance_id');
+    }
+
     const STATUS_BEFORE = 1;   // 勤務外
     const STATUS_WORKING = 2;    // 勤務中
     const STATUS_BREAK = 3;      // 休憩中
@@ -33,11 +39,6 @@ class Attendance extends Model
             ->first();
     }
 
-    public function breakTimes()
-    {
-        return $this->hasMany(BreakTime::class, 'attendance_id');
-    }
-
     /* 出勤記録を作成 */
     public static function startWork($userId)
     {
@@ -49,14 +50,21 @@ class Attendance extends Model
         ]);
     }
 
-    /* 退勤記録を更新 */
+    /* 退勤記録を更新（退勤時間と勤務時間を挿入） */
     public static function endWork($userId)
     {
-        return self::getTodayRecord($userId)
-            ->update([
-                'end_time' => now(),
-                'attendance_status_id' => self::STATUS_FINISHED,
-            ]);
+        $record = self::getTodayRecord($userId);
+
+        $startTime = $record->start_time;
+        $endTime = now();
+
+        $workingMinutes = Carbon::parse($startTime)->diffInMinutes($endTime) % 60;  
+
+        return $record->update([
+            'end_time' => $endTime,
+            'attendance_status_id' => self::STATUS_FINISHED,
+            'working_hours' => $workingMinutes,
+        ]);
     }
 
     /* 休憩開始の処理 */
@@ -110,7 +118,10 @@ class Attendance extends Model
                 if (is_null($attendance->working_hours)) {
                     $attendance->working_hours = '-';
                 } else {
-                    $attendance->working_hours = \Carbon\Carbon::parse($attendance->working_hours)->format('H:i');
+                    $hours = floor($attendance->working_hours / 60);
+                    $minutes = $attendance->working_hours % 60;
+
+                    $attendance->working_hours = sprintf('%02d:%02d', $hours, $minutes);
                 }
 
                 return $attendance;
