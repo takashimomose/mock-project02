@@ -18,6 +18,7 @@ class CreateBreakTimesTable extends Migration
             $table->unsignedBigInteger('attendance_id');
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
+            $table->integer('break_time')->nullable();
             $table->timestamps();
 
             // 外部キーの設定
