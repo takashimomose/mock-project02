@@ -106,13 +106,13 @@ class Attendance extends Model
                 if (is_null($attendance->start_time)) {
                     $attendance->start_time = '-';
                 } else {
-                    $attendance->start_time = \Carbon\Carbon::parse($attendance->start_time)->format('H:i');
+                    $attendance->start_time = Carbon::parse($attendance->start_time)->format('H:i');
                 }
 
                 if (is_null($attendance->end_time)) {
                     $attendance->end_time = '-';
                 } else {
-                    $attendance->end_time = \Carbon\Carbon::parse($attendance->end_time)->format('H:i');
+                    $attendance->end_time = Carbon::parse($attendance->end_time)->format('H:i');
                 }
 
                 if (is_null($attendance->working_hours)) {
