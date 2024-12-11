@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -16,8 +17,14 @@ class Attendance extends Model
         'date',
         'start_time',
         'end_time',
+        'working_hours',
         'attendance_status_id',
     ];
+
+    public function breakTimes()
+    {
+        return $this->hasMany(BreakTime::class, 'attendance_id');
+    }
 
     const STATUS_BEFORE = 1;   // 勤務外
     const STATUS_WORKING = 2;    // 勤務中
@@ -32,11 +39,6 @@ class Attendance extends Model
             ->first();
     }
 
-    public function breakTimes()
-    {
-        return $this->hasMany(BreakTime::class, 'attendance_id');
-    }
-
     /* 出勤記録を作成 */
     public static function startWork($userId)
     {
@@ -48,14 +50,21 @@ class Attendance extends Model
         ]);
     }
 
-    /* 退勤記録を更新 */
+    /* 退勤記録を更新（退勤時間と勤務時間を挿入） */
     public static function endWork($userId)
     {
-        return self::getTodayRecord($userId)
-            ->update([
-                'end_time' => now(),
-                'attendance_status_id' => self::STATUS_FINISHED,
-            ]);
+        $record = self::getTodayRecord($userId);
+
+        $startTime = $record->start_time;
+        $endTime = now();
+
+        $workingMinutes = Carbon::parse($startTime)->diffInMinutes($endTime) % 60;  
+
+        return $record->update([
+            'end_time' => $endTime,
+            'attendance_status_id' => self::STATUS_FINISHED,
+            'working_hours' => $workingMinutes,
+        ]);
     }
 
     /* 休憩開始の処理 */
@@ -84,5 +93,38 @@ class Attendance extends Model
                 'end_time' => now(),
             ]);
         }
+    }
+
+    /* 月の勤怠データ取得 */
+    public static function getMonthAttendance($userId, $currentMonth)
+    {
+        return self::where('user_id', $userId)
+            ->whereMonth('date', $currentMonth->month)
+            ->whereYear('date', $currentMonth->year)
+            ->get()
+            ->map(function ($attendance) {
+                if (is_null($attendance->start_time)) {
+                    $attendance->start_time = '-';
+                } else {
+                    $attendance->start_time = Carbon::parse($attendance->start_time)->format('H:i');
+                }
+
+                if (is_null($attendance->end_time)) {
+                    $attendance->end_time = '-';
+                } else {
+                    $attendance->end_time = Carbon::parse($attendance->end_time)->format('H:i');
+                }
+
+                if (is_null($attendance->working_hours)) {
+                    $attendance->working_hours = '-';
+                } else {
+                    $hours = floor($attendance->working_hours / 60);
+                    $minutes = $attendance->working_hours % 60;
+
+                    $attendance->working_hours = sprintf('%02d:%02d', $hours, $minutes);
+                }
+
+                return $attendance;
+            });
     }
 }
