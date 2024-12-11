@@ -14,7 +14,7 @@ class AttendanceStatusTableSeeder extends Seeder
      */
     public function run()
     {
-        $roles = [
+        $attendanceStatus = [
             [
                 'status_name' => '勤務外',
                 'created_at' => now(),
@@ -37,6 +37,6 @@ class AttendanceStatusTableSeeder extends Seeder
             ],
         ];
 
-        DB::table('attendance_status')->insert($roles);
+        DB::table('attendance_status')->insert($attendanceStatus);
     }
 }
