@@ -29,8 +29,10 @@
                 <ul class="header-nav-list">
                     @if (Auth::check())
                         <!-- ログインしている場合 -->
-                        <li class="header-nav-item"><a href="{{ route('attendance.show') }}" class="header-nav-link">勤怠</a></li>
-                        <li class="header-nav-item"><a href="{{ route('attendance.index') }}" class="header-nav-link">勤怠一覧</a></li>
+                        <li class="header-nav-item"><a href="{{ route('attendance.show') }}"
+                                class="header-nav-link">勤怠</a></li>
+                        <li class="header-nav-item"><a href="{{ route('attendance.index') }}"
+                                class="header-nav-link">勤怠一覧</a></li>
                         <li class="header-nav-item"><a href="" class="header-nav-link">勤怠申請</a></li>
                         <li class="header-nav-item">
                             <form class="header-nav-logout" action="{{ route('authentication.destroy') }}"
