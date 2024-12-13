@@ -1,0 +1,100 @@
+.tab-section {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    border-bottom: solid 1px #000;
+    margin-bottom: 40px;
+}
+
+.tab-section h1 {
+    padding: 0px 15px;
+    font-size: 1.875rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    border-left: solid 8px #000;
+}
+
+.tab-item {
+    height: 50px;
+    line-height: 50px;
+    transition: all 0.2s ease;
+    margin-left: 60px;
+    font-size: 1rem;
+}
+
+.tab-item:hover {
+    opacity: 0.75;
+}
+
+input[name="tab-item"] {
+    display: none;
+}
+
+.tab-section input:checked+.tab-item {
+    color: #000;
+    font-weight: 700;
+}
+
+.request-list-section {
+    width: 100%;
+    max-width: 700px;
+    padding: 0 16px;
+    margin: 0 auto;
+}
+
+.request-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    font-size: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.request-table thead {
+    border-bottom: solid 8px #f0eff2;
+    background: transparent;
+    color: #737373;
+}
+
+.request-table th {
+    padding: 1rem;
+    border-bottom: solid 4px #f0eff2;
+    background: #fff;
+    white-space: nowrap;
+}
+
+.request-table td {
+    padding: 1rem;
+    border-bottom: solid 2px #f0eff2;
+    background: #fff;
+    color: #737373;
+    font-weight: 700;
+}
+
+.request-table td:nth-child(1),
+.request-table td:nth-child(3), 
+.request-table td:nth-child(5) {
+    white-space: nowrap;  
+}
+
+.details-link {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.details-link:hover {
+    text-decoration: none;
+}
+
+@media (min-width: 1024px) {
+    .tab-section {
+        max-width: 1000px;
+    }
+
+    .request-list-section {
+        max-width: 1000px;
+    }
+}
