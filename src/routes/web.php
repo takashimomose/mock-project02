@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\AttendanceListController;
 use App\Http\Controllers\AttendanceCorrectionController;
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -28,7 +27,7 @@ Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('auth
 Route::middleware(['auth'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::get('/attendance/list', [AttendanceListController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/{attendance_id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
     Route::post('/attendance/correct', [AttendanceCorrectionController::class, 'correct'])->name('attendance.correct');
 });
