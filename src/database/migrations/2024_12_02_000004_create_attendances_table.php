@@ -17,8 +17,8 @@ class CreateAttendancesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->date('date');
-            $table->timestamp('start_time');
-            $table->timestamp('end_time')->nullable();
+            $table->time('start_time');
+            $table->time('end_time')->nullable();
             $table->integer('working_hours')->nullable();
             $table->unsignedBigInteger('attendance_status_id');
             $table->timestamps();
