@@ -28,6 +28,16 @@ class AttendanceCorrection extends Model
         return $this->hasMany(BreakTimeCorrection::class, 'attendance_correction_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function attendance()
+    {
+        return $this->belongsTo(Attendance::class);
+    }
+
     public static function createCorrectionRequest(array $validatedData)
     {
         // 日付を生成
