@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\AttendanceCorrection;
 use App\Models\BreakTime;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,32 +11,25 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    public function show()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $workingStatus = null;
 
-        $attendance = Attendance::getTodayRecord($user->id);
+        // リクエストされた月を取得。デフォルトは現在の月。
+        $month = $request->query('month', Carbon::now()->format('Y-m'));
 
-        if (!$attendance) {
-            $workingStatus = Attendance::STATUS_BEFORE;
-        } else {
-            switch ($attendance->attendance_status_id) {
-                case Attendance::STATUS_WORKING:
-                    $workingStatus = Attendance::STATUS_WORKING;
-                    break;
+        // Carbonインスタンスを作成
+        $currentMonth = Carbon::createFromFormat('Y-m', $month);
 
-                case Attendance::STATUS_BREAK:
-                    $workingStatus = Attendance::STATUS_BREAK;
-                    break;
+        $previousMonth = $currentMonth->copy()->subMonth()->format('Y-m');
 
-                case Attendance::STATUS_FINISHED:
-                    $workingStatus = Attendance::STATUS_FINISHED;
-                    break;
-            }
-        }
+        $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
 
-        return view('attendance', compact('user', 'workingStatus'));
+        $attendances = Attendance::getMonthAttendance($user->id, $currentMonth);
+
+        $breakTimes = BreakTime::getMonthBreak($user->id, $currentMonth);
+
+        return view('attendance-list', compact('currentMonth', 'previousMonth', 'nextMonth', 'attendances', 'breakTimes'));
     }
 
     public function store(Request $request)
@@ -77,31 +71,40 @@ class AttendanceController extends Controller
         return redirect()->route('attendance.show');
     }
 
-    public function index(Request $request)
+    public function show()
     {
         $user = Auth::user();
+        $workingStatus = null;
 
-        // リクエストされた月を取得。デフォルトは現在の月。
-        $month = $request->query('month', Carbon::now()->format('Y-m'));
+        $attendance = Attendance::getTodayRecord($user->id);
 
-        // Carbonインスタンスを作成
-        $currentMonth = Carbon::createFromFormat('Y-m', $month);
+        if (!$attendance) {
+            $workingStatus = Attendance::STATUS_BEFORE;
+        } else {
+            switch ($attendance->attendance_status_id) {
+                case Attendance::STATUS_WORKING:
+                    $workingStatus = Attendance::STATUS_WORKING;
+                    break;
 
-        $previousMonth = $currentMonth->copy()->subMonth()->format('Y-m');
+                case Attendance::STATUS_BREAK:
+                    $workingStatus = Attendance::STATUS_BREAK;
+                    break;
 
-        $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
+                case Attendance::STATUS_FINISHED:
+                    $workingStatus = Attendance::STATUS_FINISHED;
+                    break;
+            }
+        }
 
-        $attendances = Attendance::getMonthAttendance($user->id, $currentMonth);
-
-        $breakTimes = BreakTime::getMonthBreak($user->id, $currentMonth);
-
-        return view('attendance-list', compact('currentMonth', 'previousMonth', 'nextMonth', 'attendances', 'breakTimes'));
+        return view('attendance', compact('user', 'workingStatus'));
     }
 
     public function detail($attendanceId)
     {
-        $attendanceDetails = Attendance::getAttendanceDetails($attendanceId);
+        $attendanceDetail = Attendance::getAttendanceDetails($attendanceId);
 
-        return view('attendance-detail', compact('attendanceDetails'));
+        $attendanceCorrection = new AttendanceCorrection();
+
+        return view('attendance-detail', compact('attendanceDetail', 'attendanceCorrection'));
     }
 }
