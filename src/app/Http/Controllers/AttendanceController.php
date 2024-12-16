@@ -100,8 +100,8 @@ class AttendanceController extends Controller
 
     public function detail($attendanceId)
     {
-        $attendanceDetails = Attendance::getAttendanceDetails($attendanceId);
+        $attendanceDetail = Attendance::getAttendanceDetails($attendanceId);
 
-        return view('attendance-detail', compact('attendanceDetails'));
+        return view('attendance-detail', compact('attendanceDetail'));
     }
 }
