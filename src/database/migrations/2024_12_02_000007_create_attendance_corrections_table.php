@@ -17,8 +17,8 @@ class CreateAttendanceCorrectionsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('attendance_id');
             $table->date('date');
-            $table->timestamp('start_time')->nullable();
-            $table->timestamp('end_time')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->timestamp('request_date');
             $table->unsignedBigInteger('correction_status_id');
             $table->text('reason');
