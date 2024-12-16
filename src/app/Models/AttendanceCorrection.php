@@ -67,4 +67,14 @@ class AttendanceCorrection extends Model
 
         return $attendanceCorrection;
     }
+
+    public function isPending()
+    {
+        return $this->correction_status_id === self::PENDING;
+    }
+
+    public function isApprovedOrEmpty()
+    {
+        return !$this->correction_status_id || $this->correction_status_id === self::APPROVED;
+    }
 }

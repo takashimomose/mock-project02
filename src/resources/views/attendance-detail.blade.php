@@ -25,12 +25,10 @@
                     <tr>
                         <th>日付</th>
                         <td>
-                            @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                            @if ($attendanceCorrection->isPending())
                                 <span class="year">
                                     {{ $attendanceDetail['date_year'] }}</span>
-                            @elseif (
-                                !$attendanceDetail['correction_status_id'] ||
-                                    $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                            @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <input class="form-input" type="text" name="date_year"
                                     value="{{ old('date_year', $attendanceDetail['date_year']) }}">
                             @endif
@@ -40,11 +38,9 @@
                         </td>
                         <td></td>
                         <td>
-                            @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                            @if ($attendanceCorrection->isPending())
                                 {{ $attendanceDetail['date_day'] }}
-                            @elseif (
-                                !$attendanceDetail['correction_status_id'] ||
-                                    $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                            @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <input class="form-input" type="text" name="date_day"
                                     value="{{ old('date_day', $attendanceDetail['date_day']) }}">
                             @endif
@@ -56,11 +52,9 @@
                     <tr>
                         <th>出勤・退勤</th>
                         <td>
-                            @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                            @if ($attendanceCorrection->isPending())
                                 {{ $attendanceDetail['start_time'] }}
-                            @elseif (
-                                !$attendanceDetail['correction_status_id'] ||
-                                    $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                            @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <input class="form-input" type="text" name="start_time"
                                     value="{{ old('start_time', $attendanceDetail['start_time']) }}">
                             @endif
@@ -70,11 +64,9 @@
                         </td>
                         <td>～</td>
                         <td>
-                            @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                            @if ($attendanceCorrection->isPending())
                                 {{ $attendanceDetail['end_time'] }}
-                            @elseif (
-                                !$attendanceDetail['correction_status_id'] ||
-                                    $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                            @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <input class="form-input" type="text" name="end_time"
                                     value="{{ old('end_time', $attendanceDetail['end_time']) }}">
                             @endif
@@ -89,7 +81,7 @@
                         <tr>
                             <th>休憩</th>
                             <td>
-                                @unless ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                                @unless ($attendanceCorrection->isPending())
                                     <input class="form-input" type="text" name="break_start_time[0]"
                                         value="{{ old('break_start_time.0', '') }}">
                                     @error('break_start_time.0')
@@ -99,7 +91,7 @@
                             </td>
                             <td>～</td>
                             <td>
-                                @unless ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                                @unless ($attendanceCorrection->isPending())
                                     <input class="form-input" type="text" name="break_end_time[0]"
                                         value="{{ old('break_end_time.0', '') }}">
                                     @foreach (['break_end_time.0', 'break_time_before_end_time', 'break_within_working_hours'] as $errorKey)
@@ -119,11 +111,9 @@
                                     <th></th>
                                 @endif
                                 <td>
-                                    @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                                    @if ($attendanceCorrection->isPending())
                                         {{ $break['start_time'] }}
-                                    @elseif (
-                                        !$attendanceDetail['correction_status_id'] ||
-                                            $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                                    @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                         <input class="form-input" type="text" name="break_start_time[]"
                                             value="{{ old('break_start_time.' . $index, $break['start_time']) }}">
                                     @endif
@@ -133,11 +123,9 @@
                                 </td>
                                 <td>～</td>
                                 <td>
-                                    @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                                    @if ($attendanceCorrection->isPending())
                                         {{ $break['end_time'] }}
-                                    @elseif (
-                                        !$attendanceDetail['correction_status_id'] ||
-                                            $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                                    @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                         <input class="form-input" type="text" name="break_end_time[]"
                                             value="{{ old('break_end_time.' . $index, $break['end_time']) }}">
                                     @endif
@@ -154,11 +142,9 @@
                     <tr>
                         <th>備考</th>
                         <td colspan="3">
-                            @if ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                            @if ($attendanceCorrection->isPending())
                                 <span class="reason">{{ old('reason', $attendanceDetail['reason']) }}</span>
-                            @elseif (
-                                !$attendanceDetail['correction_status_id'] ||
-                                    $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                            @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <textarea class="form-input-reason" name="reason">{{ old('reason', '') }}</textarea>
                             @endif
                             @error('reason')
@@ -169,11 +155,9 @@
                 </table>
                 <input type="hidden" name="attendance_id"
                     value="{{ old('attendance_id', $attendanceDetail['attendance_id']) }}">
-                @if (
-                    !$attendanceDetail['correction_status_id'] ||
-                        $attendanceDetail['correction_status_id'] == AttendanceCorrection::APPROVED)
+                @if ($attendanceCorrection->isApprovedOrEmpty())
                     <button class="edit-btn" type="submit">修正</button>
-                @elseif ($attendanceDetail['correction_status_id'] == AttendanceCorrection::PENDING)
+                @elseif ($attendanceCorrection->isPending())
                     <p class="message">*承認待ちのため修正はできません。</p>
                 @endif
             </form>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\AttendanceCorrection;
 use App\Models\BreakTime;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -102,6 +103,8 @@ class AttendanceController extends Controller
     {
         $attendanceDetail = Attendance::getAttendanceDetails($attendanceId);
 
-        return view('attendance-detail', compact('attendanceDetail'));
+        $attendanceCorrection = new AttendanceCorrection();
+
+        return view('attendance-detail', compact('attendanceDetail', 'attendanceCorrection'));
     }
 }
