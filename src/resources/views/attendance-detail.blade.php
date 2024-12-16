@@ -8,10 +8,6 @@
 
 @section('content')
 
-    @php
-        use App\Models\AttendanceCorrection;
-    @endphp
-
     <main class="wrapper">
         <section class="attendance-detail-section">
             <h1>勤怠詳細</h1>
