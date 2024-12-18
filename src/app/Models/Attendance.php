@@ -162,9 +162,6 @@ class Attendance extends Model
 
         if ($attendance->date) {
             $data['date_year'] = Carbon::parse($attendance->date)->format('Y年');
-        }
-
-        if ($attendance->date) {
             $data['date_day'] = Carbon::parse($attendance->date)->format('n月j日');
         }
 
