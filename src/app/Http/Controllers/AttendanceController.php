@@ -101,7 +101,7 @@ class AttendanceController extends Controller
 
     public function detail($attendanceId)
     {
-        $attendanceDetail = Attendance::getAttendanceDetails($attendanceId);
+        $attendanceDetail = Attendance::getAttendanceDetail($attendanceId);
 
         $attendanceCorrection = new AttendanceCorrection();
 
