@@ -14,7 +14,7 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $workingStatus = null;
 
-        $attendance = Attendance::getTodayRecord($user->id); // 今日の勤怠レコードを取得
+        $attendance = Attendance::getTodayRecord($user->id);
 
         if (!$attendance) {
             $workingStatus = Attendance::STATUS_BEFORE;
@@ -74,5 +74,12 @@ class AttendanceController extends Controller
         }
 
         return redirect()->route('attendance.show');
+    }
+
+    public function detail($attendanceId)
+    {
+        $attendanceDetails = Attendance::getAttendanceDetails($attendanceId);
+
+        return view('attendance-detail', compact('attendanceDetails'));
     }
 }

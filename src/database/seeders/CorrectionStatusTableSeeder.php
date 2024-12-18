@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class RolesTableSeeder extends Seeder
+class CorrectionStatusTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,21 +14,21 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
-        $roles = [
+        $correctionStatus = [
             [
                 'id' => 1,
-                'role_name' => '管理者ユーザー',
+                'status_name' => '承認待ち',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'role_name' => '一般ユーザー',
+                'status_name' => '承認済み',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
 
-        DB::table('roles')->insert($roles);
+        DB::table('correction_status')->insert($correctionStatus);
     }
 }

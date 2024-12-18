@@ -21,9 +21,19 @@ class Attendance extends Model
         'attendance_status_id',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function breakTimes()
     {
         return $this->hasMany(BreakTime::class, 'attendance_id');
+    }
+
+    public function attendanceCorrection()
+    {
+        return $this->hasMany(AttendanceCorrection::class, 'attendance_id');
     }
 
     const STATUS_BEFORE = 1;   // 勤務外
@@ -58,7 +68,7 @@ class Attendance extends Model
         $startTime = $record->start_time;
         $endTime = now();
 
-        $workingMinutes = Carbon::parse($startTime)->diffInMinutes($endTime) % 60;  
+        $workingMinutes = Carbon::parse($startTime)->diffInMinutes($endTime) % 60;
 
         return $record->update([
             'end_time' => $endTime,
@@ -126,5 +136,61 @@ class Attendance extends Model
 
                 return $attendance;
             });
+    }
+
+    /* attendance_id別の勤怠データ取得 */
+    public function getAttendanceDetails($attendanceId)
+    {
+        $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
+            ->where('id', $attendanceId)
+            ->firstOrFail(); // レコードが存在しない場合は例外を投げる
+
+        $latestCorrection = AttendanceCorrection::where('attendance_id', $attendanceId)
+            ->latest('request_date')
+            ->first();
+
+        $data = [
+            'name' => $attendance->user->name,
+            'attendance_id' => $attendance->id,
+            'date_year' => null,
+            'date_day' => null,
+            'start_time' => null,
+            'end_time' => null,
+            'correction_status_id' => $latestCorrection->correction_status_id ?? null,
+            'reason' => $latestCorrection->reason ?? null,
+            'break_times' => [],
+        ];
+
+        if ($attendance->date) {
+            $data['date_year'] = Carbon::parse($attendance->date)->format('Y年');
+            $data['date_day'] = Carbon::parse($attendance->date)->format('n月j日');
+        }
+
+        if ($attendance->start_time) {
+            $data['start_time'] = Carbon::parse($attendance->start_time)->format('H:i');
+        }
+
+        if ($attendance->end_time) {
+            $data['end_time'] = Carbon::parse($attendance->end_time)->format('H:i');
+        }
+
+        $data['break_times'] = $attendance->breakTimes->map(function ($break) {
+            $breakData = [
+                'start_time' => null,
+                'end_time' => null,
+            ];
+
+            if ($break->start_time) {
+                $breakData['start_time'] = Carbon::parse($break->start_time)->format('H:i');
+            }
+
+            if ($break->end_time) {
+                $breakData['end_time'] = Carbon::parse($break->end_time)->format('H:i');
+            }
+
+            return $breakData;
+        });
+
+        return $data;
     }
 }
