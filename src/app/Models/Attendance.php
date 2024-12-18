@@ -139,7 +139,7 @@ class Attendance extends Model
     }
 
     /* attendance_id別の勤怠データ取得 */
-    public function getAttendanceDetails($attendanceId)
+    public function getAttendanceDetail($attendanceId)
     {
         $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
             ->findOrFail($attendanceId);
