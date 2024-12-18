@@ -22,16 +22,6 @@ class UpdateTimeColumnsToTimeType extends Migration
             $table->time('start_time')->change();
             $table->time('end_time')->change();
         });
-
-        Schema::table('attendance_corrections', function (Blueprint $table) {
-            $table->time('start_time')->change();
-            $table->time('end_time')->change();
-        });
-
-        Schema::table('break_time_corrections', function (Blueprint $table) {
-            $table->time('start_time')->change();
-            $table->time('end_time')->change();
-        });
     }
 
     /**
@@ -47,16 +37,6 @@ class UpdateTimeColumnsToTimeType extends Migration
         });
 
         Schema::table('break_times', function (Blueprint $table) {
-            $table->timestamp('start_time')->change();
-            $table->timestamp('end_time')->change();
-        });
-
-        Schema::table('attendance_corrections', function (Blueprint $table) {
-            $table->timestamp('start_time')->change();
-            $table->timestamp('end_time')->change();
-        });
-
-        Schema::table('break_time_corrections', function (Blueprint $table) {
             $table->timestamp('start_time')->change();
             $table->timestamp('end_time')->change();
         });

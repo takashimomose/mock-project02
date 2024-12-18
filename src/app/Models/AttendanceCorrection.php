@@ -20,13 +20,13 @@ class AttendanceCorrection extends Model
         'reason',
     ];
 
+    const PENDING = 1;   // 承認待ち
+    const APPROVED = 2;    // 承認済み
+
     public function breakTimeCorrections()
     {
         return $this->hasMany(BreakTimeCorrection::class, 'attendance_correction_id', 'id');
     }
-
-    const PENDING = 1;   // 承認待ち
-    const APPROVED = 2;    // 承認済み
 
     public static function createCorrectionRequest(array $validatedData)
     {
@@ -66,5 +66,15 @@ class AttendanceCorrection extends Model
         }
 
         return $attendanceCorrection;
+    }
+
+    public function isPending()
+    {
+        return $this->correction_status_id === self::PENDING;
+    }
+
+    public function isApprovedOrEmpty()
+    {
+        return !$this->correction_status_id || $this->correction_status_id === self::APPROVED;
     }
 }

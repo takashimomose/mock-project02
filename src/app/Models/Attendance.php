@@ -139,11 +139,10 @@ class Attendance extends Model
     }
 
     /* attendance_id別の勤怠データ取得 */
-    public function getAttendanceDetails($attendanceId)
+    public function getAttendanceDetail($attendanceId)
     {
         $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
-            ->where('id', $attendanceId)
-            ->firstOrFail(); // レコードが存在しない場合は例外を投げる
+            ->findOrFail($attendanceId);
 
         $latestCorrection = AttendanceCorrection::where('attendance_id', $attendanceId)
             ->latest('request_date')
