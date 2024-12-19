@@ -28,6 +28,16 @@ class AttendanceCorrection extends Model
         return $this->hasMany(BreakTimeCorrection::class, 'attendance_correction_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function attendance()
+    {
+        return $this->belongsTo(Attendance::class);
+    }
+
     public static function createCorrectionRequest(array $validatedData)
     {
         // 日付を生成
@@ -76,5 +86,32 @@ class AttendanceCorrection extends Model
     public function isApprovedOrEmpty()
     {
         return !$this->correction_status_id || $this->correction_status_id === self::APPROVED;
+    }
+
+    public static function getCorrectionsByStatus($currentUser, $status)
+    {
+        $query = self::where('correction_status_id', $status)
+            ->with(['attendance', 'attendance.user']);
+
+        // ユーザーのロールに応じて条件を追加
+        if ($currentUser->role === User::ROLE_GENERAL) {
+            // ROLE_GENERALの場合、自分のattendanceのみを対象とする
+            $query->whereHas('attendance', function ($q) use ($currentUser) {
+                $q->where('user_id', $currentUser->id);
+            });
+        }
+
+        $statusLabel = ($status === self::PENDING) ? '承認待ち' : '承認済み';
+
+        return $query->get()->map(function ($correction) use ($statusLabel) {
+            return [
+                'attendance_id' => $correction->attendance->id,
+                'correction_status_id' => $statusLabel,
+                'name' => $correction->attendance->user->name,
+                'date' => Carbon::parse($correction->attendance->date)->format('n月j日'),
+                'reason' => $correction->reason,
+                'request_date' => Carbon::parse($correction->request_date)->format('n月j日'),
+            ];
+        });
     }
 }

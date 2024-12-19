@@ -43,5 +43,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public const ROLE_GENERAL = 2;
+    const ROLE_ADMIN = 1;
+    const ROLE_GENERAL = 2;
+
 }

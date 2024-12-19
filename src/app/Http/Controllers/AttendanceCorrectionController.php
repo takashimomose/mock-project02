@@ -15,4 +15,14 @@ class AttendanceCorrectionController extends Controller
 
         return redirect()->route('attendance.index');
     }
+
+    public static function correct_index()
+    {
+        $currentUser = auth()->user();
+
+        $pendingCorrections = AttendanceCorrection::getCorrectionsByStatus($currentUser, AttendanceCorrection::PENDING);
+        $approvedCorrections = AttendanceCorrection::getCorrectionsByStatus($currentUser, AttendanceCorrection::APPROVED);
+
+        return view('request-list', compact('pendingCorrections', 'approvedCorrections'));
+    }
 }
