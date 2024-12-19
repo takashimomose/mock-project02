@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceCorrectionController;
 use App\Http\Controllers\Auth\AuthenticationController;
@@ -24,11 +25,21 @@ Route::get('/login', [AuthenticationController::class, 'show'])->name('authentic
 Route::post('/login', [AuthenticationController::class, 'store'])->name('authentication.store');
 Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('authentication.destroy');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['check.role:user'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/{attendance_id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
     Route::post('/attendance/correct', [AttendanceCorrectionController::class, 'correct'])->name('attendance.correct');
+});
+
+Route::prefix('admin')->middleware('check.role:admin')->group(function () {
+    Route::get('/login', [AuthenticationController::class, 'showAdmin'])->name('admin.auth.show');
+    Route::post('/login', [AuthenticationController::class, 'storeAdmin'])->name('admin.auth.store');
+    Route::post('/logout', [AuthenticationController::class, 'destroyAdmin'])->name('admin.auth.destroy');
+    Route::get('/attendance/list', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+});
+
+Route::middleware(['auth'])->group(function () {
     Route::get('/stamp_correction_request/list', [AttendanceCorrectionController::class, 'correct_index'])->name('attendance.correct_index');
 });

@@ -28,19 +28,36 @@
             <nav class="header-nav">
                 <ul class="header-nav-list">
                     @if (Auth::check())
-                        <!-- ログインしている場合 -->
-                        <li class="header-nav-item"><a href="{{ route('attendance.show') }}"
-                                class="header-nav-link">勤怠</a></li>
-                        <li class="header-nav-item"><a href="{{ route('attendance.index') }}"
-                                class="header-nav-link">勤怠一覧</a></li>
-                        <li class="header-nav-item"><a href="" class="header-nav-link">勤怠申請</a></li>
-                        <li class="header-nav-item">
-                            <form class="header-nav-logout" action="{{ route('authentication.destroy') }}"
-                                method="post">
-                                @csrf
-                                <button type="submit">ログアウト</button>
-                            </form>
-                        </li>
+                        <ul class="header-nav-list">
+                            @if (Auth::user()->role_id == \App\Models\User::ROLE_GENERAL)
+                                <!-- 一般ユーザーでログインしている場合 -->
+                                <li class="header-nav-item"><a href="{{ route('attendance.show') }}"
+                                        class="header-nav-link">勤怠</a></li>
+                                <li class="header-nav-item"><a href="{{ route('attendance.index') }}"
+                                        class="header-nav-link">勤怠一覧</a></li>
+                                <li class="header-nav-item"><a href="{{ route ('attendance.correct_index') }}" class="header-nav-link">申請</a></li>
+                                <li class="header-nav-item">
+                                    <form class="header-nav-logout" action="{{ route('authentication.destroy') }}"
+                                        method="post">
+                                        @csrf
+                                        <button type="submit">ログアウト</button>
+                                    </form>
+                                </li>
+                            @else
+                                <!-- 管理者でログインしている場合 -->
+                                <li class="header-nav-item"><a href="{{ route('admin.attendance.index') }}"
+                                        class="header-nav-link">勤怠一覧</a></li>
+                                <li class="header-nav-item"><a href="" class="header-nav-link">スタッフ一覧</a></li>
+                                <li class="header-nav-item"><a href="{{ route ('attendance.correct_index') }}" class="header-nav-link">申請一覧</a></li>
+                                <li class="header-nav-item">
+                                    <form class="header-nav-logout" action="{{ route('admin.auth.destroy') }}"
+                                        method="post">
+                                        @csrf
+                                        <button type="submit">ログアウト</button>
+                                    </form>
+                                </li>
+                            @endif
+                        </ul>
                     @endif
                 </ul>
             </nav>
