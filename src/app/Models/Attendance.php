@@ -192,4 +192,35 @@ class Attendance extends Model
 
         return $data;
     }
+
+    // 指定された日付でデータを取得
+    public static function getAttendancesByDate($date)
+    {
+        return self::where('date', $date)
+            ->with(['user:id,name'])
+            ->get(['user_id', 'id', 'start_time', 'end_time', 'working_hours'])
+            ->map(function ($date) {
+                if (is_null($date->start_time)) {
+                    $date->start_time = '-';
+                } else {
+                    $date->start_time = Carbon::parse($date->start_time)->format('H:i');
+                }
+
+                if (is_null($date->end_time)) {
+                    $date->end_time = '-';
+                } else {
+                    $date->end_time = Carbon::parse($date->end_time)->format('H:i');
+                }
+                if (is_null($date->working_hours)) {
+                    $date->working_hours = '-';
+                } else {
+                    $hours = floor($date->working_hours / 60);
+                    $minutes = $date->working_hours % 60;
+
+                    $date->working_hours = sprintf('%02d:%02d', $hours, $minutes);
+                }
+
+                return $date;
+            });
+    }
 }
