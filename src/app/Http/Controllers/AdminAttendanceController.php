@@ -18,7 +18,7 @@ class AdminAttendanceController extends Controller
 
         $currentDate = Carbon::createFromFormat('Y-m-d', $date);
 
-        $previousDate= $currentDate->copy()->subDay()->format('Y-m-d');
+        $previousDate = $currentDate->copy()->subDay()->format('Y-m-d');
 
         $nextDate = $currentDate->copy()->addDay()->format('Y-m-d');
 

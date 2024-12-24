@@ -32,12 +32,9 @@
                 <tbody>
                     @foreach ($attendances as $attendance)
                         <tr>
-                            <td>{{ $attendance->user->name }}
-                            </td>
-                            <td>{{ $attendance->start_time }}
-                            </td>
-                            <td>{{ $attendance->end_time }}
-                            </td>
+                            <td>{{ $attendance->user->name }}</td>
+                            <td>{{ $attendance->start_time }}</td>
+                            <td>{{ $attendance->end_time }}</td>
                             <td>
                                 @foreach ($breakTimes as $breakTime)
                                     @if ($breakTime->attendance_id == $attendance->id)
@@ -45,8 +42,7 @@
                                     @endif
                                 @endforeach
                             </td>
-                            <td>{{ $attendance->working_hours }}
-                            </td>
+                            <td>{{ $attendance->working_hours }}</td>
                             <td><a href="{{ route('attendance.detail', ['attendance_id' => $attendance->id]) }}" class="details-link">詳細</a></td>
                         </tr>
                     @endforeach
