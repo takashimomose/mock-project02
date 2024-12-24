@@ -103,7 +103,9 @@ class AttendanceController extends Controller
     {
         $attendanceDetail = Attendance::getAttendanceDetail($attendanceId);
 
-        $attendanceCorrection = new AttendanceCorrection();
+        $attendanceCorrection = AttendanceCorrection::where('attendance_id', $attendanceId)
+        ->latest('request_date')
+        ->first() ?? new AttendanceCorrection();
 
         return view('attendance-detail', compact('attendanceDetail', 'attendanceCorrection'));
     }

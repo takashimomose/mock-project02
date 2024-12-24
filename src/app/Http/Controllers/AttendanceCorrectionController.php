@@ -3,18 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AttendanceCorrectionRequest;
+use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceCorrectionController extends Controller
 {
     public function correct(AttendanceCorrectionRequest $request)
     {
         $validatedData = $request->validated();
+        $user = Auth::user();
 
-        AttendanceCorrection::createCorrectionRequest($validatedData);
+        if ($user->role_id == User::ROLE_GENERAL) {
 
-        return redirect()->route('attendance.index');
+            AttendanceCorrection::createCorrectionRequest($validatedData);
+
+            return redirect()->route('attendance.index');
+        }
+
+        if ($user->role_id == User::ROLE_ADMIN) {
+
+            Attendance::correctAttendanceAndBreakTimes($validatedData);
+
+            return redirect()->route('admin.attendance.index');
+        }
     }
+
 
     public static function correct_index()
     {

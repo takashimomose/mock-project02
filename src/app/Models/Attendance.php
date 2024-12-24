@@ -42,7 +42,7 @@ class Attendance extends Model
     const STATUS_FINISHED = 4; // 退勤済
 
     /* 今日の勤怠レコードを取得 */
-    public function getTodayRecord($userId)
+    public static function getTodayRecord($userId)
     {
         return self::where('user_id', $userId)
             ->where('date', now()->toDateString())
@@ -139,7 +139,7 @@ class Attendance extends Model
     }
 
     /* attendance_id別の勤怠データ取得 */
-    public function getAttendanceDetail($attendanceId)
+    public static function getAttendanceDetail($attendanceId)
     {
         $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
             ->findOrFail($attendanceId);
@@ -222,5 +222,66 @@ class Attendance extends Model
 
                 return $date;
             });
+    }
+
+    public static function correctAttendanceAndBreakTimes(array $validatedData)
+    {
+        // Attendanceレコードの更新
+        $attendance = self::findOrFail($validatedData['attendance_id']);
+        $attendance->start_time = Carbon::createFromFormat('H:i', $validatedData['start_time']);
+
+        if (!empty($validatedData['end_time'])) {
+            $attendance->end_time = Carbon::createFromFormat('H:i', $validatedData['end_time']);
+
+            // Carbonを使って勤務時間を計算
+            $startTime = Carbon::parse($attendance->start_time);
+            $endTime = Carbon::parse($attendance->end_time);
+
+            // 勤務時間を計算
+            $workingMinutes = $startTime->diffInMinutes($endTime);
+
+            // BreakTimeレコードの処理（既存のBreakTimeのminutesを更新）
+            if (!empty($validatedData['break_start_time']) && is_array($validatedData['break_start_time'])) {
+                // 既存のBreakTimeを削除して新規作成
+                BreakTime::where('attendance_id', $validatedData['attendance_id'])->delete();
+
+                foreach ($validatedData['break_start_time'] as $index => $breakStartTime) {
+                    $formattedBreakStartTime = null;
+                    $formattedBreakEndTime = null;
+                    $breakMinutes = 0;
+
+                    // 休憩時間の計算
+                    if (!empty($breakStartTime) && !empty($validatedData['break_end_time'][$index])) {
+                        $formattedBreakStartTime = Carbon::createFromFormat('H:i', $breakStartTime)->format('Y-m-d H:i:s');
+                        $formattedBreakEndTime = Carbon::createFromFormat('H:i', $validatedData['break_end_time'][$index])->format('Y-m-d H:i:s');
+
+                        // 休憩時間の分数を計算
+                        $breakMinutes = Carbon::parse($formattedBreakStartTime)
+                            ->diffInMinutes(Carbon::parse($formattedBreakEndTime));
+                    }
+
+                    // 新しいBreakTimeを挿入または更新
+                    BreakTime::create([
+                        'attendance_id' => $validatedData['attendance_id'],
+                        'start_time' => $formattedBreakStartTime,
+                        'end_time' => $formattedBreakEndTime,
+                        'break_time' => $breakMinutes,  // 計算された休憩時間を保存
+                    ]);
+                }
+            }
+
+            // 勤務時間（分）をデータベースに保存
+            $attendance->working_hours = $workingMinutes; // 分単位で勤務時間を保存
+        } else {
+            $attendance->end_time = null;
+            $attendance->working_hours = null;
+        }
+
+        // 日付フォーマットを保存用に変更
+        $attendance->start_time = $attendance->start_time->format('Y-m-d H:i:s');
+        $attendance->end_time = $attendance->end_time ? Carbon::parse($attendance->end_time)->format('Y-m-d H:i:s') : null;
+        $attendance->save();
+
+        return true; // 更新成功
     }
 }
