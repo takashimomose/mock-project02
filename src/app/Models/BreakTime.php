@@ -62,4 +62,24 @@ class BreakTime extends Model
     {
         return $this->belongsTo(Attendance::class);
     }
+
+    public static function getDayBreak($date)
+    {
+        return Attendance::whereDate('attendances.date', $date) 
+            ->withSum('breakTimes', 'break_time') 
+            ->get()
+            ->map(function ($attendance) {
+                if (is_null($attendance->break_times_sum_break_time)) {
+                    $attendance->formatted_break_time = '-';
+                } else {
+                    $hours = floor($attendance->break_times_sum_break_time / 60);
+                    $minutes = $attendance->break_times_sum_break_time % 60;
+                    $attendance->formatted_break_time = sprintf('%02d:%02d', $hours, $minutes);
+                }
+
+                $attendance->attendance_id = $attendance->id;
+
+                return $attendance;
+            });
+    }
 }
