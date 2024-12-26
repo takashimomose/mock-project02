@@ -73,12 +73,14 @@ class AttendanceCorrectionRequest extends FormRequest
             }
 
             // 休憩時間が勤務時間内かチェック
-            foreach ($breakStartTime as $index => $breakStart) {
-                $breakEnd = $breakEndTime[$index] ?? null;
-                if ($breakStart && $breakEnd) {
-                    // 休憩時間が勤務時間外の場合のチェック
-                    if (strtotime($breakStart) < strtotime($startTime) || strtotime($breakEnd) > strtotime($endTime)) {
-                        $validator->errors()->add('break_within_working_hours', '休憩時間が勤務時間外です');
+            if ($endTime) { // $endTimeが存在する場合のみチェックを実行
+                foreach ($breakStartTime as $index => $breakStart) {
+                    $breakEnd = $breakEndTime[$index] ?? null;
+                    if ($breakStart && $breakEnd) {
+                        // 休憩時間が勤務時間外の場合のチェック
+                        if (strtotime($breakStart) < strtotime($startTime) || strtotime($breakEnd) > strtotime($endTime)) {
+                            $validator->errors()->add('break_within_working_hours', '休憩時間が勤務時間外です');
+                        }
                     }
                 }
             }

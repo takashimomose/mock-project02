@@ -226,62 +226,94 @@ class Attendance extends Model
 
     public static function correctAttendanceAndBreakTimes(array $validatedData)
     {
-        // Attendanceレコードの更新
-        $attendance = self::findOrFail($validatedData['attendance_id']);
-        $attendance->start_time = Carbon::createFromFormat('H:i', $validatedData['start_time']);
+        // 条件判定用データ
+        $startTime = $validatedData['start_time'] ?? null;
+        $endTime = $validatedData['end_time'] ?? null;
+        $breakStartTimes = $validatedData['break_start_time'] ?? [];
+        $breakEndTimes = $validatedData['break_end_time'] ?? [];
 
-        if (!empty($validatedData['end_time'])) {
-            $attendance->end_time = Carbon::createFromFormat('H:i', $validatedData['end_time']);
+        // 条件1: end_time が null かつ break_start_time に1つだけ値が存在し、break_end_time がすべて null
+        $condition1 = is_null($endTime)
+            && count(array_filter($breakStartTimes, fn($time) => !is_null($time))) === 1
+            && count(array_filter($breakEndTimes, fn($time) => !is_null($time))) === 0;
 
-            // Carbonを使って勤務時間を計算
-            $startTime = Carbon::parse($attendance->start_time);
-            $endTime = Carbon::parse($attendance->end_time);
+        // 条件2: end_time が null かつ break_end_time の最後が null
+        $condition2 = is_null($endTime) && end($breakEndTimes) === null;
 
-            // 勤務時間を計算
-            $workingMinutes = $startTime->diffInMinutes($endTime);
+        // 条件3: 休憩の配列の最後の break_start_time と break_end_time だけ値がある場合
+        $condition3 = is_null($endTime)
+            && count(array_filter($breakStartTimes, fn($time) => is_null($time))) === 0
+            && count(array_filter($breakEndTimes, fn($time) => is_null($time))) === 0;
 
-            // BreakTimeレコードの処理（既存のBreakTimeのminutesを更新）
-            if (!empty($validatedData['break_start_time']) && is_array($validatedData['break_start_time'])) {
-                // 既存のBreakTimeを削除して新規作成
-                BreakTime::where('attendance_id', $validatedData['attendance_id'])->delete();
+        // 条件4: 休憩の配列が空の場合
+        $condition4 = empty(array_filter($breakStartTimes, fn($time) => !is_null($time)))
+            && empty(array_filter($breakEndTimes, fn($time) => !is_null($time)));
 
-                foreach ($validatedData['break_start_time'] as $index => $breakStartTime) {
-                    $formattedBreakStartTime = null;
-                    $formattedBreakEndTime = null;
-                    $breakMinutes = 0;
+        // 条件5: 休憩の配列が空でない場合
+        $condition5 = !empty($breakStartTimes) && !in_array(null, $breakStartTimes, true)
+            && !empty($breakEndTimes) && !in_array(null, $breakEndTimes, true);
 
-                    // 休憩時間の計算
-                    if (!empty($breakStartTime) && !empty($validatedData['break_end_time'][$index])) {
-                        $formattedBreakStartTime = Carbon::createFromFormat('H:i', $breakStartTime)->format('Y-m-d H:i:s');
-                        $formattedBreakEndTime = Carbon::createFromFormat('H:i', $validatedData['break_end_time'][$index])->format('Y-m-d H:i:s');
-
-                        // 休憩時間の分数を計算
-                        $breakMinutes = Carbon::parse($formattedBreakStartTime)
-                            ->diffInMinutes(Carbon::parse($formattedBreakEndTime));
-                    }
-
-                    // 新しいBreakTimeを挿入または更新
-                    BreakTime::create([
-                        'attendance_id' => $validatedData['attendance_id'],
-                        'start_time' => $formattedBreakStartTime,
-                        'end_time' => $formattedBreakEndTime,
-                        'break_time' => $breakMinutes,  // 計算された休憩時間を保存
-                    ]);
-                }
-            }
-
-            // 勤務時間（分）をデータベースに保存
-            $attendance->working_hours = $workingMinutes; // 分単位で勤務時間を保存
-        } else {
-            $attendance->end_time = null;
-            $attendance->working_hours = null;
+        // 条件を満たさない場合は処理を中断
+        if (!$condition1 && !$condition2 && !$condition3 && !$condition4 && !$condition5) {
+            return;
         }
 
-        // 日付フォーマットを保存用に変更
-        $attendance->start_time = $attendance->start_time->format('Y-m-d H:i:s');
-        $attendance->end_time = $attendance->end_time ? Carbon::parse($attendance->end_time)->format('Y-m-d H:i:s') : null;
-        $attendance->save();
+        // 勤怠データの処理
+        $attendanceStatusId = ($condition3) ? 2 : (($condition4 || $condition5) ? 4 : 3);
 
-        return true; // 更新成功
+        $workingMinutes = !is_null($endTime)
+            ? Carbon::parse($startTime)->diffInMinutes($endTime)
+            : null; // $endTimeがnullの場合は0を設定
+
+        $attendance = Attendance::updateOrCreate(
+            ['id' => $validatedData['attendance_id']],
+            [
+                'start_time' => $validatedData['start_time'] ?? null,
+                'end_time' => $endTime,
+                'working_hours' =>  $workingMinutes,
+                'attendance_status_id' => $attendanceStatusId,
+            ]
+        );
+
+        // dd($attendance );
+
+        // 既存の休憩データを削除
+        $attendance->breakTimes()->delete();
+
+        // 条件ごとの処理
+        if ($condition1 || $condition2 || $condition3 || $condition5) {
+            foreach ($breakStartTimes as $index => $startTime) {
+                $breakEndTime = $breakEndTimes[$index] ?? null;
+
+                if (!is_null($startTime) && !is_null($breakEndTime)) {
+                    $startTimeInSeconds = strtotime($startTime);
+                    $endTimeInSeconds = strtotime($breakEndTime);
+
+                    if ($endTimeInSeconds > $startTimeInSeconds) {
+                        $breakTimeInMinutes = ($endTimeInSeconds - $startTimeInSeconds) / 60;
+
+                        BreakTime::updateOrCreate(
+                            ['attendance_id' => $attendance->id, 'start_time' => $startTime],
+                            [
+                                'start_time' => $startTime,
+                                'end_time' => $breakEndTime,
+                                'break_time' => $breakTimeInMinutes,
+                            ]
+                        );
+                    }
+                } elseif (!is_null($startTime) && is_null($breakEndTime)) {
+                    BreakTime::updateOrCreate(
+                        ['attendance_id' => $attendance->id, 'start_time' => $startTime],
+                        [
+                            'start_time' => $startTime,
+                            'end_time' => null,
+                            'break_time' => null,
+                        ]
+                    );
+                }
+            }
+        }
+
+        // 条件4: 処理を特にしないが attendance_status_id=4 として設定済み
     }
 }
