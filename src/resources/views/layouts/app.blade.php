@@ -47,7 +47,7 @@
                                 <!-- 管理者でログインしている場合 -->
                                 <li class="header-nav-item"><a href="{{ route('admin.attendance.index') }}"
                                         class="header-nav-link">勤怠一覧</a></li>
-                                <li class="header-nav-item"><a href="" class="header-nav-link">スタッフ一覧</a></li>
+                                <li class="header-nav-item"><a href="{{ route('admin.staff.index') }}" class="header-nav-link">スタッフ一覧</a></li>
                                 <li class="header-nav-item"><a href="{{ route ('attendance.correct_index') }}" class="header-nav-link">申請一覧</a></li>
                                 <li class="header-nav-item">
                                     <form class="header-nav-logout" action="{{ route('admin.auth.destroy') }}"
