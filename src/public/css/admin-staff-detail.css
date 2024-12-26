@@ -95,3 +95,22 @@
 .details-link:hover {
     text-decoration: underline;
 }
+
+.csv-btn {
+    background-color: #000;
+    color: #fff;
+    font-size: 1.375rem;
+    padding: 10px 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    float: right;
+    margin-top: 80px;
+}
+
+.csv-btn:hover {
+    color: #fff;
+    background-color: #666;
+}

@@ -48,6 +48,7 @@
                     @endforeach
                 </tbody>
             </table>
+            <button class="csv-btn" type="submit">CSV出力</button>
         </section>
     </main>
 @endsection
