@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\BreakTime;
+use app\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -104,8 +105,12 @@ class AttendanceController extends Controller
         $attendanceDetail = Attendance::getAttendanceDetail($attendanceId);
 
         $attendanceCorrection = AttendanceCorrection::where('attendance_id', $attendanceId)
-        ->latest('request_date')
-        ->first() ?? new AttendanceCorrection();
+            ->latest('request_date')
+            ->first() ?? new AttendanceCorrection();
+
+        if (auth()->user()->role_id == User::ROLE_ADMIN) {
+            return view('admin-attendance-detail', compact('attendanceDetail'));
+        }
 
         return view('attendance-detail', compact('attendanceDetail', 'attendanceCorrection'));
     }

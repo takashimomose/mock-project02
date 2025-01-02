@@ -24,7 +24,8 @@ class AttendanceCorrectionController extends Controller
 
         if ($user->role_id == User::ROLE_ADMIN) {
 
-            Attendance::correctAttendanceAndBreakTimes($validatedData);
+            $attendance = Attendance::findOrFail($validatedData['attendance_id']);
+            $attendance->updateAttendance($validatedData);
 
             return redirect()->route('admin.attendance.index');
         }
