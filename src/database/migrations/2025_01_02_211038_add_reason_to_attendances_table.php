@@ -14,7 +14,7 @@ class AddReasonToAttendancesTable extends Migration
     public function up()
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->text('reason')->after('attendance_status_id');
+            $table->text('reason')->nullable()->after('attendance_status_id');
         });
     }
 
