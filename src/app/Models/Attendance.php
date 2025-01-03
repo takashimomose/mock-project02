@@ -303,8 +303,5 @@ class Attendance extends Model
                 ]);
             }
         }
-        // attendance_correctionsテーブルのcorrection_status_idをAPPROVEDに更新
-        AttendanceCorrection::where('attendance_id', $validatedData['attendance_id'])
-            ->update(['correction_status_id' => AttendanceCorrection::APPROVED]);
     }
 }
