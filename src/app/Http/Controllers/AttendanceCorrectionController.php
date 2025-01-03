@@ -6,6 +6,7 @@ use App\Http\Requests\AttendanceCorrectionRequest;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceCorrectionController extends Controller
@@ -40,5 +41,28 @@ class AttendanceCorrectionController extends Controller
         $approvedCorrections = AttendanceCorrection::getCorrectionsByStatus($currentUser, AttendanceCorrection::APPROVED);
 
         return view('request-list', compact('pendingCorrections', 'approvedCorrections'));
+    }
+
+    public function show($attendanceId)
+    {
+        $attendanceDetail = Attendance::getAttendanceDetail($attendanceId);
+
+        $attendanceCorrection = AttendanceCorrection::getCorrectionRequest($attendanceId);
+
+        return view('admin.approve', compact('attendanceDetail', 'attendanceCorrection'));
+    }
+
+    public function approve(Request $request)
+    {
+        // $attendance_idを使用してAttendanceレコードを取得
+        $attendance = Attendance::findOrFail($request->attendance_id);
+        // dd($attendance);  
+        // $requestから必要なデータを配列として抽出して渡す
+        $attendanceData = $request->only(['attendance_id', 'date_year', 'date_day', 'start_time', 'end_time', 'reason', 'break_start_time', 'break_end_time']);
+
+        // AttendanceのupdateAttendanceメソッドに配列を渡す
+        $attendance->updateAttendance($attendanceData);
+   
+        return redirect()->route('correction.show', ['attendance_id' => $attendance->attendance_id]);
     }
 }

@@ -42,7 +42,7 @@
                                 <td>{{ $pendingCorrection['date'] }}</td>
                                 <td>{{ $pendingCorrection['reason'] }}</td>
                                 <td>{{ $pendingCorrection['request_date'] }}</td>
-                                <td><a href="{{ route('attendance.detail', ['attendance_id' => $pendingCorrection['attendance_id']]) }}"
+                                <td><a href=""
                                         class="details-link">詳細</a></td>
                             </tr>
                         </tbody>
@@ -71,7 +71,7 @@
                                 <td>{{ $approvedCorrection['date'] }}</td>
                                 <td>{{ $approvedCorrection['reason'] }}</td>
                                 <td>{{ $approvedCorrection['request_date'] }}</td>
-                                <td><a href="{{ route('attendance.detail', ['attendance_id' => $approvedCorrection['attendance_id']]) }}"
+                                <td><a href=""
                                         class="details-link">詳細</a></td>
                             </tr>
                         </tbody>
