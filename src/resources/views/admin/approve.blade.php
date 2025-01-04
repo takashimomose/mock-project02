@@ -16,38 +16,38 @@
                 <table class="attendance-detail-table">
                     <tr>
                         <th>名前</th>
-                        <td colspan="3">{{ $attendanceDetail['name'] }}</td>
+                        <td colspan="3">{{ $attendanceDetails['name'] }}</td>
                     </tr>
                     <tr>
                         <th>日付</th>
                         <td>
                             <span class="year">
-                                {{ $attendanceDetail['date_year'] }}</span>
+                                {{ $attendanceDetails['date_year'] }}</span>
                             <input class="form-input" type="hidden" name="date_year"
-                                value="{{ $attendanceDetail['date_year'] }}">
+                                value="{{ $attendanceDetails['date_year'] }}">
                         </td>
                         <td></td>
                         <td>
-                            {{ $attendanceDetail['date_day'] }}
+                            {{ $attendanceDetails['date_day'] }}
                             <input class="form-input" type="hidden" name="date_day"
-                                value="{{ $attendanceDetail['date_day'] }}">
+                                value="{{ $attendanceDetails['date_day'] }}">
                         </td>
                     </tr>
                     <tr>
                         <th>出勤・退勤</th>
                         <td>
-                            {{ $attendanceCorrection['start_time'] }}
+                            {{ $attendanceDetails['start_time'] }}
                             <input class="form-input" type="hidden" name="start_time"
-                                value="{{ $attendanceCorrection['start_time'] }}">
+                                value="{{ $attendanceDetails['start_time'] }}">
                         </td>
                         <td>～</td>
                         <td>
-                            {{ $attendanceCorrection['end_time'] }}
+                            {{ $attendanceDetails['end_time'] }}
                             <input class="form-input" type="hidden" name="end_time"
-                                value="{{ $attendanceCorrection['end_time'] }}">
+                                value="{{ $attendanceDetails['end_time'] }}">
                         </td>
                     </tr>
-                    @foreach ($attendanceCorrection['break_times'] as $index => $break)
+                    @foreach ($attendanceDetails['break_times'] as $index => $break)
                         <tr>
                             @if ($loop->first)
                                 <th>休憩</th>
@@ -70,16 +70,19 @@
                     <tr>
                         <th>備考</th>
                         <td colspan="3">
-                            <span class="reason">{{ $attendanceCorrection['reason'] }}</span>
+                            <span class="reason">{{ $attendanceDetails['reason'] }}</span>
                             <input class="form-input-reason" type="hidden" name="reason"
-                                value="{{ $attendanceCorrection['reason'] }}">
+                                value="{{ $attendanceDetails['reason'] }}">
                         </td>
                     </tr>
                 </table>
-                <input type="hidden" name="attendance_id" value="{{ $attendanceDetail['attendance_id'] }}">
-                @if ($attendanceCorrection->isApprovedOrEmpty())
+                <input type="hidden" name="attendance_id" value="{{ $attendanceDetails['attendance_id'] }}">
+                <input type="hidden" name="correction_id" value="{{ $attendanceDetails['correction_id'] }}">
+                @if ($attendanceDetails['correction_status_id'] == \App\Models\AttendanceCorrection::APPROVED)
+                    <!-- 1が「承認済み」を示す場合 -->
                     <p class="approved">承認済み</p>
-                @elseif ($attendanceCorrection->isPending())
+                @elseif ($attendanceDetails['correction_status_id'] == \App\Models\AttendanceCorrection::PENDING)
+                    <!-- 2が「保留中」を示す場合 -->
                     <button class="edit-btn" type="submit">承認</button>
                 @endif
             </form>

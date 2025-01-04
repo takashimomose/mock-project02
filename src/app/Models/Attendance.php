@@ -304,4 +304,71 @@ class Attendance extends Model
             }
         }
     }
+
+    // attendance_corrections_id別の勤怠修正依頼データ取得
+    public static function getAttendanceDetailsWithCorrection($attendanceId)
+    {
+        $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
+            ->findOrFail($attendanceId);
+
+        $latestCorrection = AttendanceCorrection::where('attendance_id', $attendanceId)
+            ->latest('request_date')
+            ->with('breakTimeCorrections') // リレーションをロード
+            ->first();
+
+        $correctionId = $latestCorrection->id ?? null; // 修正IDを取得
+
+        $dateYear = null;
+        if ($attendance->date) {
+            $dateYear = Carbon::parse($attendance->date)->format('Y年');
+        }
+
+        $dateDay = null;
+        if ($attendance->date) {
+            $dateDay = Carbon::parse($attendance->date)->format('m月d日');
+        }
+
+        $startTime = null;
+        if ($latestCorrection) {
+            $startTime = Carbon::parse($latestCorrection->start_time)->format('H:i');
+        }
+
+        $endTime = null;
+        if ($latestCorrection) {
+            $endTime = Carbon::parse($latestCorrection->end_time)->format('H:i');
+        }
+
+        $breakTimes = [];
+        if ($latestCorrection) {
+            $breakTimes = $latestCorrection->breakTimeCorrections->map(function ($break) {
+                $breakStartTime = null;
+                if ($break->start_time) {
+                    $breakStartTime = Carbon::parse($break->start_time)->format('H:i');
+                }
+
+                $breakEndTime = null;
+                if ($break->end_time) {
+                    $breakEndTime = Carbon::parse($break->end_time)->format('H:i');
+                }
+
+                return [
+                    'start_time' => $breakStartTime,
+                    'end_time' => $breakEndTime,
+                ];
+            })->toArray();
+        }
+
+        return [
+            'name' => $attendance->user->name,
+            'attendance_id' => $attendance->id,
+            'date_year' => $dateYear,
+            'date_day' => $dateDay,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'correction_status_id' => $latestCorrection->correction_status_id ?? null,
+            'reason' => $latestCorrection->reason ?? null,
+            'break_times' => $breakTimes,
+            'correction_id' => $correctionId,
+        ];
+    }
 }

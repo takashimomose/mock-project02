@@ -106,6 +106,7 @@ class AttendanceCorrection extends Model
         return $query->get()->map(function ($correction) use ($statusLabel) {
             return [
                 'attendance_id' => $correction->attendance->id,
+                'correction_id' => $correction->id,
                 'correction_status_id' => $statusLabel,
                 'name' => $correction->attendance->user->name,
                 'date' => Carbon::parse($correction->attendance->date)->format('n月j日'),
@@ -143,5 +144,14 @@ class AttendanceCorrection extends Model
         })->toArray();
 
         return $query; // オブジェクトとして返す
+    }
+
+    // 勤怠修正依頼データ（休憩時間分）取得
+    public static function getLatestCorrection($attendanceId)
+    {
+        return self::with('breakTimeCorrections')
+            ->where('attendance_id', $attendanceId)
+            ->latest('request_date')
+            ->first();
     }
 }

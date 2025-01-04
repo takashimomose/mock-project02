@@ -42,8 +42,7 @@
                                 <td>{{ $pendingCorrection['date'] }}</td>
                                 <td>{{ $pendingCorrection['reason'] }}</td>
                                 <td>{{ $pendingCorrection['request_date'] }}</td>
-                                <td><a href=""
-                                        class="details-link">詳細</a></td>
+                                <td><a href="{{ url('stamp_correction_request/approve/' . $pendingCorrection['correction_id']) }}" class="details-link">詳細</a></td>
                             </tr>
                         </tbody>
                     @endforeach
@@ -71,8 +70,7 @@
                                 <td>{{ $approvedCorrection['date'] }}</td>
                                 <td>{{ $approvedCorrection['reason'] }}</td>
                                 <td>{{ $approvedCorrection['request_date'] }}</td>
-                                <td><a href=""
-                                        class="details-link">詳細</a></td>
+                                <td><a href="{{ url('stamp_correction_request/approve/' . $approvedCorrection['correction_id']) }}" class="details-link">詳細</a></td>
                             </tr>
                         </tbody>
                     @endforeach

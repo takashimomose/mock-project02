@@ -48,6 +48,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware('check.role:admin')->group(function () {
-    Route::get('/stamp_correction_request/approve/{attendance_id}', [AttendanceCorrectionController::class, 'show'])->name('correction.show');
+    Route::get('/stamp_correction_request/approve/{id}', [AttendanceCorrectionController::class, 'show'])->name('correction.show');
     Route::post('/stamp_correction_request/approve', [AttendanceCorrectionController::class, 'approve'])->name('correction.approve');
 });
