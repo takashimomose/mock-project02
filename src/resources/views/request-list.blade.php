@@ -42,7 +42,15 @@
                                 <td>{{ $pendingCorrection['date'] }}</td>
                                 <td>{{ $pendingCorrection['reason'] }}</td>
                                 <td>{{ $pendingCorrection['request_date'] }}</td>
-                                <td><a href="{{ url('stamp_correction_request/approve/' . $pendingCorrection['correction_id']) }}" class="details-link">詳細</a></td>
+                                <td>
+                                    @if (auth()->user()->role_id === \App\Models\User::ROLE_ADMIN)
+                                        <a href="{{ url('stamp_correction_request/approve/' . $pendingCorrection['correction_id']) }}"
+                                            class="details-link">詳細</a>
+                                    @elseif(auth()->user()->role_id === \App\Models\User::ROLE_GENERAL)
+                                        <a href="{{ url('attendance/' . $pendingCorrection['attendance_id']) }}"
+                                            class="details-link">詳細</a>
+                                    @endif
+                                </td>
                             </tr>
                         </tbody>
                     @endforeach
@@ -70,7 +78,15 @@
                                 <td>{{ $approvedCorrection['date'] }}</td>
                                 <td>{{ $approvedCorrection['reason'] }}</td>
                                 <td>{{ $approvedCorrection['request_date'] }}</td>
-                                <td><a href="{{ url('stamp_correction_request/approve/' . $approvedCorrection['correction_id']) }}" class="details-link">詳細</a></td>
+                                <td>
+                                    @if (auth()->user()->role_id === \App\Models\User::ROLE_ADMIN)
+                                        <a href="{{ url('stamp_correction_request/approve/' . $approvedCorrection['correction_id']) }}"
+                                            class="details-link">詳細</a>
+                                    @elseif(auth()->user()->role_id === \App\Models\User::ROLE_GENERAL)
+                                        <a href="{{ url('attendance/' . $approvedCorrection['attendance_id']) }}"
+                                            class="details-link">詳細</a>
+                                    @endif
+                                </td>
                             </tr>
                         </tbody>
                     @endforeach
