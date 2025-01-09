@@ -11,12 +11,12 @@
         <section class="attendance-list-section">
             <h1>{{ $currentDate->format('Y年m月d日') }}</h1>
             <div class="attendance-header">
-                <a href="{{ url('admin/attendance/list?date=' . $previousDate) }}" class="prev-btn">&larr; 前月</a>
+                <a href="{{ url('admin/attendance/list?date=' . $previousDate) }}" class="prev-btn">&larr; 前日</a>
                 <span class="current-month">
                     <img src="{{ asset('images/calendar.svg') }}" class="calendar-icon" alt="calendar-icon">
                     {{ $currentDate->format('Y/n') }}
                 </span>
-                <a href="{{ url('admin/attendance/list?date=' . $nextDate) }}" class="next-btn">翌月 &rarr;</a>
+                <a href="{{ url('admin/attendance/list?date=' . $nextDate) }}" class="next-btn">翌日 &rarr;</a>
             </div>
             <table class="attendance-table">
                 <thead>
