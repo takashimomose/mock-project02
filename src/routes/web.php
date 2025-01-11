@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceCorrectionController;
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +38,8 @@ Route::prefix('admin')->middleware('check.role:admin')->group(function () {
     Route::post('/login', [AuthenticationController::class, 'storeAdmin'])->name('admin.auth.store');
     Route::post('/logout', [AuthenticationController::class, 'destroyAdmin'])->name('admin.auth.destroy');
     Route::get('/attendance/list', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+    Route::get('/staff/list', [StaffController::class, 'index'])->name('admin.staff.index');
+    Route::get('/attendance/staff/{id}', [StaffController::class, 'detail'])->name('admin.staff.detail');
 });
 
 Route::middleware(['auth'])->group(function () {
