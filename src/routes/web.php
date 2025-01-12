@@ -3,9 +3,9 @@
 use App\Http\Controllers\AdminAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceCorrectionController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
 
 /*
