@@ -11,7 +11,7 @@
     <main class="wrapper">
         <section class="attendance-detail-section">
             <h1>勤怠詳細</h1>
-            <form action="{{ route('attendance.correct') }}" method="POST">
+            <form action="{{ route('admin.attendance.correct') }}" method="POST">
                 @csrf
                 <table class="attendance-detail-table">
                     <tr>
