@@ -47,7 +47,7 @@
                                 value="{{ $attendanceDetails['end_time'] }}">
                         </td>
                     </tr>
-                    @foreach ($attendanceDetails['break_times'] as $index => $break)
+                    @foreach ($attendanceDetails['break_times'] as $break)
                         <tr>
                             @if ($loop->first)
                                 <th>休憩</th>

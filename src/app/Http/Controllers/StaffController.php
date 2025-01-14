@@ -13,7 +13,7 @@ class StaffController extends Controller
 {
     public function index()
     {
-        $staffMembers = User::where('role_id', 2)->get(['id', 'name', 'email']);
+        $staffMembers = User::where('role_id', User::ROLE_GENERAL)->get(['id', 'name', 'email']);
 
         return view('admin.staff-list', compact('staffMembers'));
     }
