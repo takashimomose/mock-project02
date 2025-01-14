@@ -47,3 +47,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/correct/admin', [AttendanceCorrectionController::class, 'correctAdmin'])->name('admin.attendance.correct');
     Route::get('/stamp_correction_request/list', [AttendanceCorrectionController::class, 'correct_index'])->name('attendance.correct_index');
 });
+
+Route::middleware('check.role:admin')->group(function () {
+    Route::get('/stamp_correction_request/approve/{id}', [AttendanceCorrectionController::class, 'show'])->name('correction.show');
+    Route::post('/stamp_correction_request/approve', [AttendanceCorrectionController::class, 'approve'])->name('correction.approve');
+});

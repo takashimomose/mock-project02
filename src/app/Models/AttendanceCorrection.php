@@ -106,6 +106,7 @@ class AttendanceCorrection extends Model
         return $query->get()->map(function ($correction) use ($statusLabel) {
             return [
                 'attendance_id' => $correction->attendance->id,
+                'correction_id' => $correction->id,
                 'correction_status_id' => $statusLabel,
                 'name' => $correction->attendance->user->name,
                 'date' => Carbon::parse($correction->attendance->date)->format('n月j日'),
@@ -113,5 +114,44 @@ class AttendanceCorrection extends Model
                 'request_date' => Carbon::parse($correction->request_date)->format('n月j日'),
             ];
         });
+    }
+
+    public static function getCorrectionRequest($attendanceId)
+    {
+        // 勤怠修正レコードを取得
+        $query = self::where('attendance_id', $attendanceId)
+            ->latest('request_date')
+            ->with('breakTimeCorrections') // 関連するBreakTimeCorrectionを一緒に取得
+            ->first();
+
+        // $queryがnullでないことを確認
+        if (!$query) {
+            return null; // nullを返す
+        }
+
+        // 勤怠修正レコードのstart_timeとend_timeを取得
+        $query->start_time = Carbon::parse($query->start_time)->format('H:i') ?? null;
+        $query->end_time = Carbon::parse($query->end_time)->format('H:i') ?? null;
+        $query->reason = $query->reason ?? null;
+        $query->correction_status_id = $query->correction_status_id ?? null;
+
+        // 休憩修正レコードのstart_timeとend_timeを取得
+        $query->break_times = $query->breakTimeCorrections->map(function ($breakTime) {
+            return [
+                'start_time' => Carbon::parse($breakTime->start_time)->format('H:i'),
+                'end_time' => Carbon::parse($breakTime->end_time)->format('H:i'),
+            ];
+        })->toArray();
+
+        return $query; // オブジェクトとして返す
+    }
+
+    // 勤怠修正依頼データ（休憩時間分）取得
+    public static function getLatestCorrection($attendanceId)
+    {
+        return self::with('breakTimeCorrections')
+            ->where('attendance_id', $attendanceId)
+            ->latest('request_date')
+            ->first();
     }
 }
