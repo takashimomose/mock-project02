@@ -19,6 +19,7 @@ class Attendance extends Model
         'end_time',
         'working_hours',
         'attendance_status_id',
+        'reason',
     ];
 
     public function user()
@@ -42,7 +43,7 @@ class Attendance extends Model
     const STATUS_FINISHED = 4; // 退勤済
 
     /* 今日の勤怠レコードを取得 */
-    public function getTodayRecord($userId)
+    public static function getTodayRecord($userId)
     {
         return self::where('user_id', $userId)
             ->where('date', now()->toDateString())
@@ -139,7 +140,7 @@ class Attendance extends Model
     }
 
     /* attendance_id別の勤怠データ取得 */
-    public function getAttendanceDetail($attendanceId)
+    public static function getAttendanceDetail($attendanceId)
     {
         $attendance = self::with(['user:id,name', 'breakTimes:id,attendance_id,start_time,end_time'])
             ->findOrFail($attendanceId);
@@ -151,18 +152,19 @@ class Attendance extends Model
         $data = [
             'name' => $attendance->user->name,
             'attendance_id' => $attendance->id,
+            'reason' => $attendance->reason,
             'date_year' => null,
             'date_day' => null,
             'start_time' => null,
             'end_time' => null,
             'correction_status_id' => $latestCorrection->correction_status_id ?? null,
-            'reason' => $latestCorrection->reason ?? null,
+            'correction_reason' => $latestCorrection->reason ?? null,
             'break_times' => [],
         ];
 
         if ($attendance->date) {
             $data['date_year'] = Carbon::parse($attendance->date)->format('Y年');
-            $data['date_day'] = Carbon::parse($attendance->date)->format('n月j日');
+            $data['date_day'] = Carbon::parse($attendance->date)->format('m月d日');
         }
 
         if ($attendance->start_time) {
@@ -222,5 +224,84 @@ class Attendance extends Model
 
                 return $date;
             });
+    }
+
+    public function updateAttendance(array $validatedData)
+    {
+        $formattedDate = Carbon::createFromFormat('Y年m月d日', "{$validatedData['date_year']}{$validatedData['date_day']}")
+            ->format('Y-m-d');
+
+        // end_time が入力されていない場合
+        if (empty($validatedData['end_time'])) {
+            // break_end_time 配列の最後の値を取得してチェック
+            $lastBreakEndTime = null;
+            if (!empty($validatedData['break_end_time'])) {
+                $lastBreakEndTime = end($validatedData['break_end_time']);
+            }
+
+            // break_end_time 配列の最後の値が null の場合
+            if (empty($lastBreakEndTime)) {
+                $attendanceStatusId = self::STATUS_BREAK;
+            } else {
+                $attendanceStatusId = self::STATUS_WORKING;
+            }
+        } else {
+            $attendanceStatusId = self::STATUS_FINISHED;
+        }
+
+        // 勤怠情報の更新処理
+        $this->update([
+            'date' => $formattedDate,
+            'start_time' => $validatedData['start_time'],
+            'end_time' => $validatedData['end_time'],
+            'break_times' => array_map(
+                null,
+                $validatedData['break_start_time'] ?? [],
+                $validatedData['break_end_time'] ?? []
+            ),
+            'reason' => $validatedData['reason'],
+            'attendance_status_id' => $attendanceStatusId,
+        ]);
+
+        // 勤怠時間（working_hours）の計算と更新
+        $workingMinutes = null;
+        if (!empty($validatedData['start_time']) && !empty($validatedData['end_time'])) {
+            $startTime = new \DateTime($validatedData['start_time']);
+            $endTime = new \DateTime($validatedData['end_time']);
+            $workingMinutes = Carbon::parse($startTime)->diffInMinutes($endTime);
+        }
+
+        $this->update([
+            'working_hours' => $workingMinutes,
+        ]);
+
+        BreakTime::where('attendance_id', $validatedData['attendance_id'])->delete();
+
+        // 新しい休憩時間の追加
+        if (!empty($validatedData['break_start_time'])) {
+            foreach ($validatedData['break_start_time'] as $index => $breakStartTime) {
+                $breakEndTime = $validatedData['break_end_time'][$index] ?? null;
+
+                // break_start_time と break_end_time の両方が null の場合はスキップ
+                if (empty($breakStartTime) && empty($breakEndTime)) {
+                    continue;
+                }
+
+                // break_time の計算（休憩時間の差を求める）
+                $breakTimeMinutes = null;
+                if ($breakStartTime && $breakEndTime) {
+                    $startTime = Carbon::parse($breakStartTime);
+                    $endTime = Carbon::parse($breakEndTime);
+                    $breakTimeMinutes = $endTime->diffInMinutes($startTime);
+                }
+
+                BreakTime::create([
+                    'attendance_id' => $validatedData['attendance_id'],
+                    'start_time' => $breakStartTime,
+                    'end_time' => $breakEndTime,
+                    'break_time' => $breakTimeMinutes,
+                ]);
+            }
+        }
     }
 }

@@ -3,9 +3,9 @@
 use App\Http\Controllers\AdminAttendanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceCorrectionController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,7 +30,6 @@ Route::middleware(['check.role:user'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::post('/attendance/correct', [AttendanceCorrectionController::class, 'correct'])->name('attendance.correct');
 });
 
 Route::prefix('admin')->middleware('check.role:admin')->group(function () {
@@ -44,5 +43,7 @@ Route::prefix('admin')->middleware('check.role:admin')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/{attendance_id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
+    Route::post('/attendance/correct/general', [AttendanceCorrectionController::class, 'correctGeneral'])->name('attendance.correct');
+    Route::post('/attendance/correct/admin', [AttendanceCorrectionController::class, 'correctAdmin'])->name('admin.attendance.correct');
     Route::get('/stamp_correction_request/list', [AttendanceCorrectionController::class, 'correct_index'])->name('attendance.correct_index');
 });

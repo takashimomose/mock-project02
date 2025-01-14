@@ -56,29 +56,36 @@ class AttendanceCorrectionRequest extends FormRequest
         $validator->after(function ($validator) {
             $startTime = $this->input('start_time');
             $endTime = $this->input('end_time');
-            $breakStartTime = $this->input('break_start_time');
-            $breakEndTime = $this->input('break_end_time');
+            $breakStartTime = $this->input('break_start_time', []);
+            $breakEndTime = $this->input('break_end_time', []);
 
-            // 出勤時間が退勤時間より遅くないかチェック
+            // 出勤時間と退勤時間の順序チェック
             if ($startTime && $endTime && strtotime($startTime) >= strtotime($endTime)) {
                 $validator->errors()->add('start_time_before_end_time', '出勤時間もしくは退勤時間が不適切な値です');
             }
 
-            // 休憩開始時間が終了時間より遅くないかチェック
+            // 各休憩時間の開始・終了順序チェック
             foreach ($breakStartTime as $index => $breakStart) {
                 $breakEnd = $breakEndTime[$index] ?? null;
                 if ($breakStart && $breakEnd && strtotime($breakStart) >= strtotime($breakEnd)) {
-                    $validator->errors()->add('break_time_before_end_time', '休憩開始時間もしくは休憩終了時間が不適切な値です');
+                    $validator->errors()->add("break_time_before_end_time.{$index}", '休憩時間が不適切な値です');
+                }
+
+                // break_start_timeが空でbreak_end_timeに入力がある場合のチェック
+                if (empty($breakStart) && !empty($breakEnd)) {
+                    $validator->errors()->add("break_start_time_empty.{$index}", '休憩開始時間が未入力です');
                 }
             }
 
-            // 休憩時間が勤務時間内かチェック
-            foreach ($breakStartTime as $index => $breakStart) {
-                $breakEnd = $breakEndTime[$index] ?? null;
-                if ($breakStart && $breakEnd) {
-                    // 休憩時間が勤務時間外の場合のチェック
-                    if (strtotime($breakStart) < strtotime($startTime) || strtotime($breakEnd) > strtotime($endTime)) {
-                        $validator->errors()->add('break_within_working_hours', '休憩時間が勤務時間外です');
+            // 休憩時間が勤務時間内であるかのチェック
+            if ($startTime && $endTime) {
+                foreach ($breakStartTime as $index => $breakStart) {
+                    $breakEnd = $breakEndTime[$index] ?? null;
+                    if (
+                        $breakStart && $breakEnd &&
+                        (strtotime($breakStart) < strtotime($startTime) || strtotime($breakEnd) > strtotime($endTime))
+                    ) {
+                        $validator->errors()->add("break_within_working_hours.{$index}", '休憩時間が勤務時間外です');
                     }
                 }
             }
