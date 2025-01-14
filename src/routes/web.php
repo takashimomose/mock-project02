@@ -39,6 +39,7 @@ Route::prefix('admin')->middleware('check.role:admin')->group(function () {
     Route::get('/attendance/list', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
     Route::get('/staff/list', [StaffController::class, 'index'])->name('admin.staff.index');
     Route::get('/attendance/staff/{id}', [StaffController::class, 'detail'])->name('admin.staff.detail');
+    Route::get('/attendance/staff/{id}/export', [StaffController::class, 'exportCsv'])->name('admin.staff.export');
 });
 
 Route::middleware(['auth'])->group(function () {

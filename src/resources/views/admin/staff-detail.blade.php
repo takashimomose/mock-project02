@@ -35,7 +35,8 @@
                             <td>{{ \Carbon\Carbon::parse($attendance->date)->isoFormat('M/D') .
                                 '(' .
                                 ['日', '月', '火', '水', '木', '金', '土'][\Carbon\Carbon::parse($attendance->date)->dayOfWeek] .
-                                ')' }}</td>
+                                ')' }}
+                            </td>
                             <td>{{ $attendance->start_time }}</td>
                             <td>{{ $attendance->end_time }}</td>
                             <td>{{ optional($breakTimes->firstWhere('attendance_id', $attendance->id))->formatted_break_time ?? '-' }}
@@ -48,7 +49,10 @@
                     @endforeach
                 </tbody>
             </table>
-            <button class="csv-btn" type="submit">CSV出力</button>
+            <form method="GET" action="{{ route('admin.staff.export', ['id' => $user->id]) }}">
+                <input type="hidden" name="month" value="{{ $currentMonth->format('Y-m') }}">
+                <button class="csv-btn" type="submit">CSV出力</button>
+            </form>
         </section>
     </main>
 @endsection
