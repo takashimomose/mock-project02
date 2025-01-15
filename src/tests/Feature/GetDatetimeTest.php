@@ -15,7 +15,7 @@ class GetDatetimeTest extends TestCase
     {
         // 初回ログインのユーザーを作成
         $user = User::create([
-            'role_id' => '2',
+            'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
