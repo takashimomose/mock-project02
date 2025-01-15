@@ -6,6 +6,8 @@ use App\Http\Controllers\AttendanceCorrectionController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,3 +55,21 @@ Route::middleware('check.role:admin')->group(function () {
     Route::get('/stamp_correction_request/approve/{id}', [AttendanceCorrectionController::class, 'show'])->name('correction.show');
     Route::post('/stamp_correction_request/approve', [AttendanceCorrectionController::class, 'approve'])->name('correction.approve');
 });
+
+// メール認証
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->name('verification.notice');
+
+// ユーザーがメール認証を行うためのルート
+Route::get('/email/verify/{id}/{hash}', function (Request $request) {
+    $user = User::findOrFail($request->route('id'));
+
+    if (! hash_equals((string) $request->route('hash'), sha1($user->email))) {
+        throw new \Illuminate\Validation\ValidationException('Invalid email verification link.');
+    }
+
+    $user->markEmailAsVerified();
+
+    return redirect()->route('authentication.show')->with('verified', true);
+})->middleware(['signed'])->name('verification.verify');
