@@ -22,7 +22,6 @@ class AttendanceStatusTest extends TestCase
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
-            'last_login_at' => null, // 初回ログイン
         ]);
 
         // ログインページへのアクセス
@@ -57,7 +56,6 @@ class AttendanceStatusTest extends TestCase
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
-            'last_login_at' => null, // 初回ログイン
         ]);
 
         // 勤務中のレコードを作成
@@ -100,7 +98,6 @@ class AttendanceStatusTest extends TestCase
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
-            'last_login_at' => null, // 初回ログイン
         ]);
 
         // 勤務中のレコードを作成
@@ -143,7 +140,6 @@ class AttendanceStatusTest extends TestCase
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
-            'last_login_at' => null, // 初回ログイン
         ]);
 
         // 勤務中のレコードを作成
