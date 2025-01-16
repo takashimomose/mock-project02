@@ -80,9 +80,11 @@
                                 @unless ($attendanceCorrection->isPending())
                                     <input class="form-input" type="text" name="break_start_time[0]"
                                         value="{{ old('break_start_time.0', '') }}">
-                                    @error('break_start_time.0')
-                                        <div class="error-message">{{ $message }}</div>
-                                    @enderror
+                                    @foreach (['break_start_time.0', 'break_time_out_of_range'] as $errorKey)
+                                        @error($errorKey)
+                                            <div class="error-message">{{ $message }}</div>
+                                        @enderror
+                                    @endforeach
                                 @endunless
                             </td>
                             <td>～</td>
@@ -113,7 +115,7 @@
                                         <input class="form-input" type="text" name="break_start_time[]"
                                             value="{{ old('break_start_time.' . $index, $break['start_time']) }}">
                                     @endif
-                                    @foreach (['break_start_time.' . $index, 'break_start_time_empty.' . $index] as $errorKey)
+                                    @foreach (['break_start_time.' . $index, 'break_start_time_empty.' . $index, 'break_time_out_of_range.' . $index] as $errorKey)
                                         @error($errorKey)
                                             <div class="error-message">{{ $message }}</div>
                                         @enderror
@@ -141,7 +143,8 @@
                         <th>備考</th>
                         <td colspan="3">
                             @if ($attendanceCorrection->isPending())
-                                <span class="reason">{{ old('correction_reason', $attendanceDetail['correction_reason']) }}</span>
+                                <span
+                                    class="reason">{{ old('correction_reason', $attendanceDetail['correction_reason']) }}</span>
                             @elseif ($attendanceCorrection->isApprovedOrEmpty())
                                 <textarea class="form-input-reason" name="reason">{{ old('reason', '') }}</textarea>
                             @endif
