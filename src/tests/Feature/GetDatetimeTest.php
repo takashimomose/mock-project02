@@ -13,14 +13,13 @@ class GetDatetimeTest extends TestCase
 
     public function test_get_date_on_attendance_page()
     {
-        // 初回ログインのユーザーを作成
+        // ログインのユーザーを作成
         $user = User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
-            'last_login_at' => null, // 初回ログイン
         ]);
 
         // ログインページへのアクセス
