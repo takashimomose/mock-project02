@@ -46,25 +46,17 @@ class EndWorkTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('退勤');
 
-        // attendances テーブルの attendance_status_id を STATUS_FINISHED に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-            'end_time' => '18:00:00',
+        // 退勤済のリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_work' => Attendance::STATUS_FINISHED,
         ]);
 
         $response = $this->get('/attendance');
@@ -104,25 +96,24 @@ class EndWorkTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 出勤時間を設定
+        $startWorkTime = now();
+
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('退勤');
 
-        // attendances テーブルの attendance_status_id を STATUS_FINISHED に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
+        // 退勤時間を現在時刻から540分後に計算
+        $endWorkTime = $startWorkTime->copy()->addMinutes(540);
+        Carbon::setTestNow($endWorkTime);
 
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-            'end_time' => '18:00:00',
+        // 退勤済のリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_work' => Attendance::STATUS_FINISHED,
         ]);
 
         $response = $this->get('/attendance');
@@ -156,7 +147,8 @@ class EndWorkTest extends TestCase
         $response = $this->get('/admin/attendance/list');
         $response->assertStatus(200);
 
-        // 休憩時間 が 01:00として表示されることを確認
-        $response->assertSee('18:00');
+        // 退勤時間が表示されることを確認
+        $expectedEndWorkTime = $endWorkTime->format('H:i');
+        $response->assertSee($expectedEndWorkTime);
     }
 }
