@@ -47,32 +47,17 @@ class BreakTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
@@ -112,52 +97,25 @@ class BreakTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩戻');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'end_time' => '13:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_WORKING に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 休憩終了にレコードを更新するリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_break' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
@@ -197,52 +155,25 @@ class BreakTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩戻');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'end_time' => '13:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_WORKING に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 休憩終了にレコードを更新するリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_break' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
@@ -283,72 +214,33 @@ class BreakTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩戻');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'end_time' => '13:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_WORKING に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 休憩終了にレコードを更新するリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_break' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '14:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
@@ -388,52 +280,28 @@ class BreakTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩入');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-        ]);
-
-        // attendances テーブルの attendance_status_id を STATUS_BREAK に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_BREAK,
+        // 休憩中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
         ]);
 
         $response = $this->get('/attendance');
         $response->assertSee('休憩戻');
 
-        // break_times テーブルにレコードを挿入
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::today()->toDateString())
-                ->value('id'),
-            'end_time' => '13:00:00',
-        ]);
+        // 時間経過をシミュレート（例: 30分後）
+        Carbon::setTestNow(now()->addMinutes(30));
 
-        // attendances テーブルの attendance_status_id を STATUS_WORKING に更新
-        $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today()->toDateString())
-            ->first();
-
-        $attendance->update([
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 休憩終了にレコードを更新するリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_break' => Attendance::STATUS_WORKING,
         ]);
 
         // ログアウト
@@ -464,7 +332,8 @@ class BreakTest extends TestCase
         $response = $this->get('/admin/attendance/list');
         $response->assertStatus(200);
 
-        // 休憩時間 が 01:00として表示されることを確認
-        $response->assertSee('01:00');
+        // 計算結果をアサーション
+        $expectedBreakTime = 30; // 期待する休憩時間
+        $response->assertSee((string) $expectedBreakTime);
     }
 }
