@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Attendance;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -58,14 +57,6 @@ class AttendanceStatusTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
-        ]);
-
         // ログインページへのアクセス
         $response = $this->get('/login');
         $response->assertStatus(200);
@@ -78,6 +69,11 @@ class AttendanceStatusTest extends TestCase
 
         // 認証されていることを確認
         $this->assertAuthenticatedAs($user);
+
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
+        ]);
 
         // 勤怠画面へのリダイレクトを確認
         $response->assertRedirect('/attendance');
@@ -100,14 +96,6 @@ class AttendanceStatusTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_BREAK,
-        ]);
-
         // ログインページへのアクセス
         $response = $this->get('/login');
         $response->assertStatus(200);
@@ -120,6 +108,17 @@ class AttendanceStatusTest extends TestCase
 
         // 認証されていることを確認
         $this->assertAuthenticatedAs($user);
+
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
+        ]);
+        $response->assertRedirect('/attendance');
+
+        // 休憩中のステータスを設定するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_break' => Attendance::STATUS_BREAK,
+        ]);
 
         // 勤怠画面へのリダイレクトを確認
         $response->assertRedirect('/attendance');
@@ -142,14 +141,6 @@ class AttendanceStatusTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
-
         // ログインページへのアクセス
         $response = $this->get('/login');
         $response->assertStatus(200);
@@ -162,6 +153,17 @@ class AttendanceStatusTest extends TestCase
 
         // 認証されていることを確認
         $this->assertAuthenticatedAs($user);
+
+        // 勤務開始のリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
+        ]);
+        $response->assertRedirect('/attendance');
+
+        // 退勤済のリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_work' => Attendance::STATUS_FINISHED,
+        ]);
 
         // 勤怠画面へのリダイレクトを確認
         $response->assertRedirect('/attendance');

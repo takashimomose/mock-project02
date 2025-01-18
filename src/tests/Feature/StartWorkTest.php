@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
-class AttendanceTest extends TestCase
+class StartWorkTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -46,12 +46,9 @@ class AttendanceTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
@@ -91,13 +88,15 @@ class AttendanceTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        // 勤務開始のリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
+        ]);
+        $response->assertRedirect('/attendance');
+
+        // 退勤済のリクエストを送信
+        $response = $this->post('/attendance', [
+            'end_work' => Attendance::STATUS_FINISHED,
         ]);
 
         $response = $this->get('/attendance');
@@ -137,12 +136,9 @@ class AttendanceTest extends TestCase
 
         $response->assertSee('出勤');
 
-        // 勤務中のレコードを作成
-        Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::today()->toDateString(),
-            'start_time' => '09:00:00',
-            'attendance_status_id' => Attendance::STATUS_WORKING,
+        // 勤務中のレコードを作成するリクエストを送信
+        $response = $this->post('/attendance', [
+            'start_work' => Attendance::STATUS_WORKING,
         ]);
 
         $response = $this->get('/attendance');
@@ -176,7 +172,7 @@ class AttendanceTest extends TestCase
         $response = $this->get('/admin/attendance/list');
         $response->assertStatus(200);
 
-        // start_time が 09:00として表示されることを確認
-        $response->assertSee('09:00');
+        // start_time が表示されることを確認
+        $response->assertSee(Carbon::parse(now())->format('H:i'),);
     }
 }
