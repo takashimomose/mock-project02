@@ -110,7 +110,7 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
 
-        $breakTime = BreakTime::create([
+        BreakTime::create([
             'attendance_id' => Attendance::where('user_id', $user->id)
                 ->where('date', Carbon::now()->toDateString())
                 ->value('id'),
@@ -177,7 +177,7 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
 
-        $breakTime = BreakTime::create([
+        BreakTime::create([
             'attendance_id' => Attendance::where('user_id', $user->id)
                 ->where('date', Carbon::now()->toDateString())
                 ->value('id'),
@@ -245,7 +245,7 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
 
-        $breakTime = BreakTime::create([
+        BreakTime::create([
             'attendance_id' => Attendance::where('user_id', $user->id)
                 ->where('date', Carbon::now()->toDateString())
                 ->value('id'),
@@ -314,7 +314,7 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
 
-        $breakTime = BreakTime::create([
+        BreakTime::create([
             'attendance_id' => Attendance::where('user_id', $user->id)
                 ->where('date', Carbon::now()->toDateString())
                 ->value('id'),
