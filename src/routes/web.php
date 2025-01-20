@@ -29,10 +29,12 @@ Route::group([], function () {
     Route::post('/login', [AuthenticationController::class, 'store'])->name('authentication.store');
     Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('authentication.destroy');
 
+    // メール認証
     Route::get('/email/verify', function () {
         return view('auth.verify-email');
     })->name('verification.notice');
 
+    // ユーザーがメール認証を行うためのルート
     Route::get('/email/verify/{id}/{hash}', function (Request $request) {
         $user = User::findOrFail($request->route('id'));
 
@@ -46,17 +48,16 @@ Route::group([], function () {
     })->middleware(['signed'])->name('verification.verify');
 });
 
+Route::middleware(['check.role:user'])->group(function () {
+    Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
+});
+
 Route::prefix('admin')->middleware('check.role:admin')->group(function () {
     Route::get('/login', [AuthenticationController::class, 'showAdmin'])->name('admin.auth.show');
     Route::post('/login', [AuthenticationController::class, 'storeAdmin'])->name('admin.auth.store');
     Route::post('/logout', [AuthenticationController::class, 'destroyAdmin'])->name('admin.auth.destroy');
-});
-
-// 認証必要ルート
-Route::middleware(['auth', 'check.role:user'])->group(function () {
-    Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
-    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
 });
 
 Route::prefix('admin')->middleware(['auth', 'check.role:admin'])->group(function () {

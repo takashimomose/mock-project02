@@ -112,6 +112,7 @@ class Attendance extends Model
         return self::where('user_id', $userId)
             ->whereMonth('date', $currentMonth->month)
             ->whereYear('date', $currentMonth->year)
+            ->orderBy('date', 'asc')
             ->get()
             ->map(function ($attendance) {
                 if (is_null($attendance->start_time)) {
@@ -228,8 +229,15 @@ class Attendance extends Model
 
     public function updateAttendance(array $validatedData)
     {
+        // attendance_id から Attendance レコードを取得
+        $attendance = self::findOrFail($validatedData['attendance_id']);
+        $userId = $attendance->user_id;
+
         $formattedDate = Carbon::createFromFormat('Y年m月d日', "{$validatedData['date_year']}{$validatedData['date_day']}")
             ->format('Y-m-d');
+
+        // 対象レコードの削除
+        self::where('user_id', $userId)->where('date', $formattedDate)->delete(); // user_id と date が一致するレコード
 
         // end_time が入力されていない場合
         if (empty($validatedData['end_time'])) {
@@ -319,13 +327,13 @@ class Attendance extends Model
         $correctionId = $latestCorrection->id ?? null; // 修正IDを取得
 
         $dateYear = null;
-        if ($attendance->date) {
-            $dateYear = Carbon::parse($attendance->date)->format('Y年');
+        if ($latestCorrection->date) {
+            $dateYear = Carbon::parse($latestCorrection->date)->format('Y年');
         }
 
         $dateDay = null;
-        if ($attendance->date) {
-            $dateDay = Carbon::parse($attendance->date)->format('m月d日');
+        if ($latestCorrection->date) {
+            $dateDay = Carbon::parse($latestCorrection->date)->format('m月d日');
         }
 
         $startTime = null;
