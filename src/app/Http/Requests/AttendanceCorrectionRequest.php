@@ -81,6 +81,16 @@ class AttendanceCorrectionRequest extends FormRequest
             if ($startTime && $endTime) {
                 foreach ($breakStartTime as $index => $breakStart) {
                     $breakEnd = $breakEndTime[$index] ?? null;
+
+                    // break_end_timeが空でも、break_start_timeが勤務時間内であるか確認
+                    if (
+                        $breakStart &&
+                        (strtotime($breakStart) < strtotime($startTime) ||
+                            (empty($breakEnd) && strtotime($breakStart) > strtotime($endTime)))
+                    ) {
+                        $validator->errors()->add("break_time_out_of_range.{$index}", '休憩時間が勤務時間外です');
+                    }
+
                     if (
                         $breakStart && $breakEnd &&
                         (strtotime($breakStart) < strtotime($startTime) || strtotime($breakEnd) > strtotime($endTime))
