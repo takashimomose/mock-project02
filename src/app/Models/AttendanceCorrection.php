@@ -12,6 +12,7 @@ class AttendanceCorrection extends Model
 
     protected $fillable = [
         'attendance_id',
+        'old_date',
         'date',
         'start_time',
         'end_time',
@@ -40,9 +41,13 @@ class AttendanceCorrection extends Model
 
     public static function createCorrectionRequest(array $validatedData)
     {
-        // 日付を生成
+        // 修正後の日付を生成
         $dateString = $validatedData['date_year'] . $validatedData['date_day'];
         $date = Carbon::createFromFormat('Y年n月j日', $dateString)->format('Y-m-d');
+
+        // 修正前の日付を作成
+        $oldDateString = $validatedData['old_date_year'] . $validatedData['old_date_day'];
+        $oldDate = Carbon::createFromFormat('Y年n月j日', $oldDateString)->format('Y-m-d');
 
         // 開始時間の処理
         $start_time = Carbon::createFromFormat('H:i', $validatedData['start_time'])->format('Y-m-d H:i:s');
@@ -52,6 +57,7 @@ class AttendanceCorrection extends Model
 
         // 勤怠修正データを作成
         $attendanceCorrection = self::create([
+            'old_date' => $oldDate,
             'date' => $date,
             'start_time' => $start_time,
             'end_time' => $end_time,
@@ -109,7 +115,7 @@ class AttendanceCorrection extends Model
                 'correction_id' => $correction->id,
                 'correction_status_id' => $statusLabel,
                 'name' => $correction->attendance->user->name,
-                'date' => Carbon::parse($correction->date)->format('n月j日'),
+                'old_date' => Carbon::parse($correction->old_date)->format('n月j日'),
                 'reason' => $correction->reason,
                 'request_date' => Carbon::parse($correction->request_date)->format('n月j日'),
             ];

@@ -32,6 +32,8 @@ class AttendanceCorrectionRequest extends FormRequest
             'break_end_time.*' => ['nullable', 'date_format:H:i',],
             'reason' => ['required'],
             'attendance_id' => ['required'],
+            'old_date_year' => ['required'],
+            'old_date_day' => ['required'],
         ];
     }
 
