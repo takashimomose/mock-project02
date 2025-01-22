@@ -21,7 +21,7 @@ $ git clone git@github.com:takashimomose/mock-project02.git
 クローンしたプロジェクトディレクトリへ移動し、Dockerコンテナをビルドおよび起動します。
 
 ```bash
-$ cd mock-project01
+$ cd mock-project02
 $ docker-compose up -d --build
 ```
 
@@ -114,7 +114,6 @@ $ php artisan storage:link
 
 ### 13.再度動作確認
 再度ブラウザで以下にアクセスし、以下の画面が正しく表示されていることを確認してください。
-新規ユーザー登録画面：http://localhost/register
 ログイン画面：http://localhost/login
 管理者ログイン画面：http://localhost/admin/login
 
@@ -138,7 +137,7 @@ $ php artisan storage:link
 
 ## 使用技術
 - PHP 7.4.9
-- Laravel 8.83.27
+- Laravel 8.83.29
 - MySQL 15.1
 
 ## URL
