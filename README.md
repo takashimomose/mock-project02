@@ -145,4 +145,27 @@ $ php artisan storage:link
 - phpMyAdmin：http://localhost:8080/
 
 ## その他
+PHPUnitテストの実行には、以下のコマンドを使用してください。
 
+・全テストを実行する場合：
+
+```bash
+vendor/bin/phpunit
+```
+もしくは
+
+```bash
+php artisan test --testsuite=Feature
+```
+
+・特定のテストファイルを実行する場合：
+
+```bash
+vendor/bin/phpunit tests/Unit/<ファイル名>
+```
+
+もしくは
+
+```bash
+php artisan test tests/Feature/<ファイル名>
+```
