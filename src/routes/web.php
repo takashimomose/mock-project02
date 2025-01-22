@@ -20,6 +20,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/', function () {
+    return redirect('/login');
+});
+
 // 公開ルート
 Route::group([], function () {
     Route::get('/register', [RegisterController::class, 'show'])->name('register.show');
@@ -48,7 +53,7 @@ Route::group([], function () {
     })->middleware(['signed'])->name('verification.verify');
 });
 
-Route::middleware(['check.role:user'])->group(function () {
+Route::middleware(['auth', 'check.role:user'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.index');
