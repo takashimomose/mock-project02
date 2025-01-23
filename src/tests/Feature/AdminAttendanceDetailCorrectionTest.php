@@ -14,43 +14,73 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_attendance_detail()
+    private function createUser()
     {
-        // ユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
+            'name' => 'テストユーザー1',
+            'email' => 'registered01@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
 
-        // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
+    private function createUser2()
+    {
+        return User::create([
+            'role_id' => User::ROLE_GENERAL,
+            'name' => 'テストユーザー2',
+            'email' => 'registered02@example.com',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
         ]);
+    }
 
-        $breakTime = BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::now()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-            'end_time' => '13:00:00',
-            'break_time' => '60',
-        ]);
-
-        // 管理者ユーザーを作成
-        $adminUser = User::create([
+    private function createAdminUser()
+    {
+        return User::create([
             'role_id' => User::ROLE_ADMIN,
             'name' => '管理者ユーザー',
             'email' => 'admin@example.com',
             'password' => Hash::make('adminpassword123'),
+            'email_verified_at' => now(),
         ]);
+    }
+
+    private function createAttendance($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
+            'date' => Carbon::now()->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+    }
+
+    private function createBreakTime($attendanceId)
+    {
+        return BreakTime::create([
+            'attendance_id' => $attendanceId,
+            'start_time' => '12:00:00',
+            'end_time' => '13:00:00',
+            'break_time' => '60',
+        ]);
+    }
+
+    public function test_attendance_detail()
+    {
+        // 一般ユーザーを作成
+        $user = $this->createUser();
+
+        // 勤怠データを作成
+        $attendance = $this->createAttendance($user->id);
+
+        $breakTime = $this->createBreakTime($attendance->id);
+
+        // 管理者ユーザーを作成
+        $adminUser = $this->createAdminUser();
 
         // 管理者ログインページにアクセス
         $response = $this->get('/admin/login');
@@ -91,41 +121,16 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
 
     public function test_start_time()
     {
-        // ユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        // 一般ユーザーを作成
+        $user = $this->createUser();
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance($user->id);
 
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::now()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-            'end_time' => '13:00:00',
-            'break_time' => '60',
-        ]);
+        $this->createBreakTime($attendance->id);
 
         // 管理者ユーザーを作成
-        $adminUser = User::create([
-            'role_id' => User::ROLE_ADMIN,
-            'name' => '管理者ユーザー',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('adminpassword123'),
-        ]);
+        $adminUser = $this->createAdminUser();
 
         // 管理者ログインページにアクセス
         $response = $this->get('/admin/login');
@@ -158,41 +163,16 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
 
     public function test_break_start_time()
     {
-        // ユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        // 一般ユーザーを作成
+        $user = $this->createUser();
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance($user->id);
 
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::now()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-            'end_time' => '13:00:00',
-            'break_time' => '60',
-        ]);
+        $this->createBreakTime($attendance->id);
 
         // 管理者ユーザーを作成
-        $adminUser = User::create([
-            'role_id' => User::ROLE_ADMIN,
-            'name' => '管理者ユーザー',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('adminpassword123'),
-        ]);
+        $adminUser = $this->createAdminUser();
 
         // 管理者ログインページにアクセス
         $response = $this->get('/admin/login');
@@ -226,41 +206,16 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
 
     public function test_break_end_time()
     {
-        // ユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        // 一般ユーザーを作成
+        $user = $this->createUser();
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance($user->id);
 
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::now()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-            'end_time' => '13:00:00',
-            'break_time' => '60',
-        ]);
+        $this->createBreakTime($attendance->id);
 
         // 管理者ユーザーを作成
-        $adminUser = User::create([
-            'role_id' => User::ROLE_ADMIN,
-            'name' => '管理者ユーザー',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('adminpassword123'),
-        ]);
+        $adminUser = $this->createAdminUser();
 
         // 管理者ログインページにアクセス
         $response = $this->get('/admin/login');
@@ -295,41 +250,16 @@ class AdminAttendanceDetailCorrectionTest extends TestCase
 
     public function test_reason()
     {
-        // ユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        // 一般ユーザーを作成
+        $user = $this->createUser();
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance($user->id);
 
-        BreakTime::create([
-            'attendance_id' => Attendance::where('user_id', $user->id)
-                ->where('date', Carbon::now()->toDateString())
-                ->value('id'),
-            'start_time' => '12:00:00',
-            'end_time' => '13:00:00',
-            'break_time' => '60',
-        ]);
+        $this->createBreakTime($attendance->id);
 
         // 管理者ユーザーを作成
-        $adminUser = User::create([
-            'role_id' => User::ROLE_ADMIN,
-            'name' => '管理者ユーザー',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('adminpassword123'),
-        ]);
+        $adminUser = $this->createAdminUser();
 
         // 管理者ログインページにアクセス
         $response = $this->get('/admin/login');

@@ -13,16 +13,21 @@ class StartWorkTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_attendance_button()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    public function test_attendance_button()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -58,13 +63,7 @@ class StartWorkTest extends TestCase
     public function test_attendance_once_a_day()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -106,13 +105,7 @@ class StartWorkTest extends TestCase
     public function test_attendance_start_time()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');

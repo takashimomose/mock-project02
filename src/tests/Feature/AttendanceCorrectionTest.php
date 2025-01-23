@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
-use App\Models\BreakTime;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -15,16 +14,73 @@ class AttendanceCorrectionTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_start_time()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    private function createAttendance1($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
+            'date' => Carbon::now()->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+    }
+
+    private function createAttendance2($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
+            'date' => Carbon::now()->subDay()->toDateString(),
+            'start_time' => '10:00:00',
+            'end_time' => '19:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+    }
+
+    private function createAttendanceCorrection1($attendance1)
+    {
+        return AttendanceCorrection::create([
+            'old_date' => $attendance1->date,
+            'date' => Carbon::now()->toDateString(),
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+            'attendance_id' => $attendance1->id,
+            'request_date' => Carbon::now(),
+            'correction_status_id' => AttendanceCorrection::APPROVED,
+            'reason' => '勤怠を間違えたため修正お願いします。',
+        ]);
+    }
+
+    private function createAttendanceCorrection2($attendance2)
+    {
+        return AttendanceCorrection::create([
+            'old_date' => $attendance2->date,
+            'date' => Carbon::now()->subDay()->toDateString(),
+            'start_time' => '07:30',
+            'end_time' => '16:30',
+            'attendance_id' => $attendance2->id,
+            'request_date' => Carbon::now(),
+            'correction_status_id' => AttendanceCorrection::APPROVED,
+            'reason' => '昨日の勤怠も修正お願いします。',
+        ]);
+    }
+
+    public function test_start_time()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -43,14 +99,7 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');
@@ -70,13 +119,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_break_start_time()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -95,14 +138,7 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');
@@ -123,13 +159,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_break_end_time()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -148,14 +178,7 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');
@@ -177,13 +200,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_reason()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -202,14 +219,7 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');
@@ -228,13 +238,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_attendance_correction_request()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -253,14 +257,7 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');
@@ -268,6 +265,8 @@ class AttendanceCorrectionTest extends TestCase
         $response = $this->get('/attendance/' . $attendance->id);
 
         $response = $this->post('/attendance/correct/general', [
+            'old_date_year' => Carbon::now()->format('Y年'),
+            'old_date_day' => Carbon::now()->format('m月d日'),
             'date_year' => Carbon::now()->format('Y年'),
             'date_day' => Carbon::now()->format('m月d日'),
             'start_time' => '08:00',
@@ -335,13 +334,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_pending_request_list()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -360,26 +353,13 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを2つ作成
-        $attendance1 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
-
-        $attendance2 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->subDay()->toDateString(),
-            'start_time' => '10:00:00',
-            'end_time' => '19:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance1 = $this->createAttendance1($user->id);
+        $attendance2 = $this->createAttendance2($user->id);
 
         // 勤怠修正リクエストを2つ作成
         $this->post('/attendance/correct/general', [
+            'old_date_year' => Carbon::now()->format('Y年'),
+            'old_date_day' => Carbon::now()->format('m月d日'),
             'date_year' => Carbon::now()->format('Y年'),
             'date_day' => Carbon::now()->format('m月d日'),
             'start_time' => '08:00',
@@ -391,6 +371,8 @@ class AttendanceCorrectionTest extends TestCase
         ])->assertRedirect('/attendance/list');
 
         $this->post('/attendance/correct/general', [
+            'old_date_year' => Carbon::now()->subDay()->format('Y年'),
+            'old_date_day' => Carbon::now()->subDay()->format('m月d日'),
             'date_year' => Carbon::now()->subDay()->format('Y年'),
             'date_day' => Carbon::now()->subDay()->format('m月d日'),
             'start_time' => '07:30',
@@ -433,13 +415,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_approved_request_list()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -458,44 +434,12 @@ class AttendanceCorrectionTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを2つ作成
-        $attendance1 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
-
-        $attendance2 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->subDay()->toDateString(),
-            'start_time' => '10:00:00',
-            'end_time' => '19:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance1 = $this->createAttendance1($user->id);
+        $attendance2 = $this->createAttendance2($user->id);
 
         // 承認済みの勤怠修正リクエストデータを2つ作成
-        AttendanceCorrection::create([
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '08:00',
-            'end_time' => '17:00',
-            'attendance_id' => $attendance1->id,
-            'correction_status_id' => AttendanceCorrection::APPROVED,
-            'reason' => '勤怠を間違えたため修正お願いします。',
-            'request_date' => Carbon::now(),
-        ]);
-
-        AttendanceCorrection::create([
-            'date' => Carbon::now()->subDay()->toDateString(),
-            'start_time' => '07:30',
-            'end_time' => '16:30',
-            'attendance_id' => $attendance2->id,
-            'correction_status_id' => AttendanceCorrection::APPROVED,
-            'reason' => '昨日の勤怠も修正お願いします。',
-            'request_date' => Carbon::now(),
-        ]);
+        $this->createAttendanceCorrection1($attendance1);
+        $this->createAttendanceCorrection2($attendance2);
 
         // 申請一覧画面（承認済みタブ）にアクセス
         $response = $this->get('/stamp_correction_request/list?tab=approved');
@@ -519,13 +463,7 @@ class AttendanceCorrectionTest extends TestCase
     public function test_attendance_detail_from_request_list()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -543,18 +481,13 @@ class AttendanceCorrectionTest extends TestCase
         // 勤怠画面へのリダイレクトを確認
         $response->assertRedirect('/attendance');
 
-        // 勤怠データを2つ作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        // 勤怠データを作成
+        $attendance = $this->createAttendance1($user->id);
 
         // 勤怠修正リクエストを作成
         $this->post('/attendance/correct/general', [
+            'old_date_year' => Carbon::now()->subYear()->format('Y年'),
+            'old_date_day' => Carbon::now()->subDay()->format('m月d日'),
             'date_year' => Carbon::now()->format('Y年'),
             'date_day' => Carbon::now()->format('m月d日'),
             'start_time' => '08:00',
