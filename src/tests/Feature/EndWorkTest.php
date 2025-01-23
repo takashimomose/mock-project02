@@ -96,6 +96,7 @@ class EndWorkTest extends TestCase
         $response->assertSee('出勤');
 
         // 出勤時間を設定
+        Carbon::setTestNow(Carbon::create(2025, 1, 20, 9, 0, 0));
         $startWorkTime = now();
 
         // 勤務中のレコードを作成するリクエストを送信
