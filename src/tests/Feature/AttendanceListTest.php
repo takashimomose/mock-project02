@@ -14,16 +14,53 @@ class AttendanceListTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_attendance_list()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    private function createAttendance1($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
+            'date' => Carbon::now()->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+    }
+
+    private function createAttendance2($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
+            'date' => Carbon::now()->addDay()->toDateString(),
+            'start_time' => '10:00:00',
+            'end_time' => '19:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+    }
+
+    private function createBreakTime($attendance, $time)
+    {
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_time' => $time,
+        ]);
+    }
+
+    public function test_attendance_list()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -42,42 +79,14 @@ class AttendanceListTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成（現在の月のデータを2件作成）
-        $attendance1 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
-
-        $attendance2 = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->addDay()->toDateString(),
-            'start_time' => '10:00:00',
-            'end_time' => '19:00:00',
-            'working_hours' => 450,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance1 = $this->createAttendance1($user->id);
+        $attendance2 = $this->createAttendance2($user->id);
 
         // 対応する休憩データを作成（複数の休憩時間）
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 30,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 15,
-        ]);
-
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 45,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 20,
-        ]);
+        $this->createBreakTime($attendance1, 30);
+        $this->createBreakTime($attendance1, 15);
+        $this->createBreakTime($attendance2, 45);
+        $this->createBreakTime($attendance2, 20);
 
         // /attendance/list にアクセス
         $response = $this->get('/attendance/list');
@@ -86,13 +95,13 @@ class AttendanceListTest extends TestCase
         // 勤怠データがレスポンスに含まれているか確認（1件目）
         $response->assertSee('09:00'); // 出勤時間
         $response->assertSee('18:00'); // 退勤時間
-        $response->assertSee('08:00'); // 勤務時間
+        $response->assertSee('09:00'); // 勤務時間
         $response->assertSee('00:45'); // 休憩時間
 
         // 勤怠データがレスポンスに含まれているか確認（2件目）
         $response->assertSee('10:00');
         $response->assertSee('19:00');
-        $response->assertSee('07:30');
+        $response->assertSee('09:00');
         $response->assertSee('01:05');
     }
 
@@ -101,13 +110,7 @@ class AttendanceListTest extends TestCase
         $currentMonth = Carbon::now()->format('Y/n');
 
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -142,13 +145,7 @@ class AttendanceListTest extends TestCase
         $previousMonthFormatted = $previousMonth->format('Y-m');
 
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -169,7 +166,7 @@ class AttendanceListTest extends TestCase
         // 勤怠データを作成（前月のデータを2件作成）
         $attendance1 = Attendance::create([
             'user_id' => $user->id,
-            'date' => $previousMonth->startOfMonth()->toDateString(),
+            'date' => $previousMonth->toDateString(),
             'start_time' => '09:00:00',
             'end_time' => '18:00:00',
             'working_hours' => 480,
@@ -178,7 +175,7 @@ class AttendanceListTest extends TestCase
 
         $attendance2 = Attendance::create([
             'user_id' => $user->id,
-            'date' => $previousMonth->startOfMonth()->addDay()->toDateString(),
+            'date' => $previousMonth->addDay()->toDateString(),
             'start_time' => '10:00:00',
             'end_time' => '19:00:00',
             'working_hours' => 450,
@@ -186,23 +183,10 @@ class AttendanceListTest extends TestCase
         ]);
 
         // 対応する休憩データを作成（複数の休憩時間）
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 30,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 15,
-        ]);
-
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 45,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 20,
-        ]);
+        $this->createBreakTime($attendance1, 30);
+        $this->createBreakTime($attendance1, 15);
+        $this->createBreakTime($attendance2, 45);
+        $this->createBreakTime($attendance2, 20);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('前月');
@@ -233,13 +217,7 @@ class AttendanceListTest extends TestCase
         $nextMonthFormatted = $nextMonth->format('Y-m');
 
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -260,7 +238,7 @@ class AttendanceListTest extends TestCase
         // 勤怠データを作成（前月のデータを2件作成）
         $attendance1 = Attendance::create([
             'user_id' => $user->id,
-            'date' => $nextMonth->startOfMonth()->toDateString(),
+            'date' => $nextMonth->toDateString(),
             'start_time' => '09:00:00',
             'end_time' => '18:00:00',
             'working_hours' => 480,
@@ -269,31 +247,18 @@ class AttendanceListTest extends TestCase
 
         $attendance2 = Attendance::create([
             'user_id' => $user->id,
-            'date' => $nextMonth->startOfMonth()->addDay()->toDateString(),
+            'date' => $nextMonth->addDay()->toDateString(),
             'start_time' => '10:00:00',
             'end_time' => '19:00:00',
-            'working_hours' => 450,
+            'working_hours' => 540,
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
 
         // 対応する休憩データを作成（複数の休憩時間）
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 30,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance1->id,
-            'break_time' => 15,
-        ]);
-
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 45,
-        ]);
-        BreakTime::create([
-            'attendance_id' => $attendance2->id,
-            'break_time' => 20,
-        ]);
+        $this->createBreakTime($attendance1, 30);
+        $this->createBreakTime($attendance1, 15);
+        $this->createBreakTime($attendance2, 45);
+        $this->createBreakTime($attendance2, 20);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('翌月');
@@ -310,20 +275,14 @@ class AttendanceListTest extends TestCase
         // 勤怠データがレスポンスに含まれているか確認（2件目）
         $response->assertSee('10:00');
         $response->assertSee('19:00');
-        $response->assertSee('07:30');
+        $response->assertSee('09:00');
         $response->assertSee('01:05');
     }
 
     public function test_attendance_detail_button()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -342,14 +301,7 @@ class AttendanceListTest extends TestCase
         $response->assertRedirect('/attendance');
 
         // 勤怠データを作成
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => Carbon::now()->startOfMonth()->toDateString(),
-            'start_time' => '09:00:00',
-            'end_time' => '18:00:00',
-            'working_hours' => 480,
-            'attendance_status_id' => Attendance::STATUS_FINISHED,
-        ]);
+        $attendance = $this->createAttendance1($user->id);
 
         $response = $this->get('/attendance/list');
         $response->assertSee('詳細');

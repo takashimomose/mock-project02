@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AttendancesTableSeeder extends Seeder
 {
@@ -14,118 +15,48 @@ class AttendancesTableSeeder extends Seeder
      */
     public function run()
     {
-        $attendances = [
-            [
-                'id' => 1,
+        $attendances = [];
+
+        // 12/1から1/15までの日付を生成
+        $startDate = Carbon::create(2024, 12, 1);
+        $endDate = Carbon::create(2025, 1, 15);
+        $date = $startDate->copy();
+
+        while ($date->lte($endDate)) {
+            // user_id 2 のデータ
+            $startTime = $date->copy()->setTime(9, rand(0, 59));
+            $endTime = $startTime->copy()->addHours(8)->addMinutes(rand(0, 30));
+            $workingHours = $startTime->diffInMinutes($endTime);
+
+            $attendances[] = [
                 'user_id' => 2,
-                'date' => '2024-11-01',
-                'start_time' => '2024-11-01 09:43:22',
-                'end_time' => '2024-11-01 18:45:25',
-                'working_hours' => 542,
+                'date' => $date->toDateString(),
+                'start_time' => $startTime->toDateTimeString(),
+                'end_time' => $endTime->toDateTimeString(),
+                'working_hours' => $workingHours,
                 'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 2,
+                'created_at' => $startTime,
+                'updated_at' => $endTime,
+            ];
+
+            // user_id 3 のデータ
+            $startTime = $date->copy()->setTime(10, rand(0, 59));
+            $endTime = $startTime->copy()->addHours(7)->addMinutes(rand(0, 30));
+            $workingHours = $startTime->diffInMinutes($endTime);
+
+            $attendances[] = [
                 'user_id' => 3,
-                'date' => '2024-11-01',
-                'start_time' => '2024-11-01 07:43:22',
-                'end_time' => '2024-11-01 17:45:25',
-                'working_hours' => 602,
+                'date' => $date->toDateString(),
+                'start_time' => $startTime->toDateTimeString(),
+                'end_time' => $endTime->toDateTimeString(),
+                'working_hours' => $workingHours,
                 'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 3,
-                'user_id' => 2,
-                'date' => '2024-11-02',
-                'start_time' => '2024-11-02 07:43:22',
-                'end_time' => '2024-11-02 17:45:25',
-                'working_hours' => 602,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 4,
-                'user_id' => 3,
-                'date' => '2024-11-02',
-                'start_time' => '2024-11-02 08:59:35',
-                'end_time' => '2024-11-02 18:00:21',
-                'working_hours' => 540,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 5,
-                'user_id' => 2,
-                'date' => '2024-11-03',
-                'start_time' => '2024-11-03 08:59:35',
-                'end_time' => '2024-11-03 18:00:21',
-                'working_hours' => 540,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 6,
-                'user_id' => 2,
-                'date' => '2024-11-30',
-                'start_time' => '2024-11-30 08:57:11',
-                'end_time' => '2024-11-30 18:11:28',
-                'working_hours' => 554,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 7,
-                'user_id' => 2,
-                'date' => '2025-01-01',
-                'start_time' => '2025-01-01 09:43:22',
-                'end_time' => '2025-01-01 18:45:25',
-                'working_hours' => 542,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 8,
-                'user_id' => 2,
-                'date' => '2025-01-02',
-                'start_time' => '2025-01-02 07:43:22',
-                'end_time' => '2025-01-02 17:45:25',
-                'working_hours' => 602,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 9,
-                'user_id' => 2,
-                'date' => '2025-01-03',
-                'start_time' => '2025-01-03 08:59:35',
-                'end_time' => '2025-01-03 18:00:21',
-                'working_hours' => 540,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 10,
-                'user_id' => 2,
-                'date' => '2025-01-31',
-                'start_time' => '2025-01-31 08:57:11',
-                'end_time' => '2025-01-31 18:11:28',
-                'working_hours' => 554,
-                'attendance_status_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ];
+                'created_at' => $startTime,
+                'updated_at' => $endTime,
+            ];
+
+            $date->addDay();
+        }
 
         DB::table('attendances')->insert($attendances);
     }

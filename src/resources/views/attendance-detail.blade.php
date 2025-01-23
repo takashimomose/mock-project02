@@ -156,6 +156,10 @@
                 </table>
                 <input type="hidden" name="attendance_id"
                     value="{{ old('attendance_id', $attendanceDetail['attendance_id']) }}">
+                <input type="hidden" name="old_date_year"
+                    value="{{ old('date_year', $attendanceDetail['date_year']) }}">
+                <input type="hidden" name="old_date_day"
+                    value="{{ old('date_day', $attendanceDetail['date_day']) }}">
                 @if ($attendanceCorrection->isApprovedOrEmpty())
                     <button class="edit-btn" type="submit">修正</button>
                 @elseif ($attendanceCorrection->isPending())
