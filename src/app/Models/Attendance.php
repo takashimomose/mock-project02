@@ -20,6 +20,7 @@ class Attendance extends Model
         'working_hours',
         'attendance_status_id',
         'reason',
+        'is_deleted',
     ];
 
     public function user()
@@ -41,6 +42,11 @@ class Attendance extends Model
     const STATUS_WORKING = 2;    // 勤務中
     const STATUS_BREAK = 3;      // 休憩中
     const STATUS_FINISHED = 4; // 退勤済
+
+    const NOT_DELETED = 0;
+    const DELETED = 1;
+
+    const NUMBER_OF_OLD_ATTENDANCE_RECORDS = 1;
 
     /* 今日の勤怠レコードを取得 */
     public static function getTodayRecord($userId)
@@ -110,6 +116,7 @@ class Attendance extends Model
     public static function getMonthAttendance($userId, $currentMonth)
     {
         return self::where('user_id', $userId)
+            ->where('is_deleted', 0)
             ->whereMonth('date', $currentMonth->month)
             ->whereYear('date', $currentMonth->year)
             ->orderBy('date', 'asc')
@@ -200,6 +207,7 @@ class Attendance extends Model
     public static function getAttendancesByDate($date)
     {
         return self::where('date', $date)
+            ->where('is_deleted', 0)
             ->with(['user:id,name'])
             ->get(['user_id', 'id', 'start_time', 'end_time', 'working_hours'])
             ->map(function ($date) {
@@ -282,6 +290,23 @@ class Attendance extends Model
         $this->update([
             'working_hours' => $workingMinutes,
         ]);
+
+        // user_id, date, is_deleted=0の勤怠レコードをカウント
+        $attendanceToDeleteCount = self::where('user_id', $userId)
+            ->where('date', $formattedDate)
+            ->where('is_deleted', self::NOT_DELETED)
+            ->count();
+
+        // 上記の条件で１レコードよりあるとき、更新したレコードのひとつ古いレコードのis_deletedを1にする
+        if ($attendanceToDeleteCount > self::NUMBER_OF_OLD_ATTENDANCE_RECORDS) {
+            $attendanceToDelete = self::where('user_id', $userId)
+                ->where('date', $formattedDate)
+                ->where('is_deleted', self::NOT_DELETED)
+                ->orderBy('updated_at', 'desc')
+                ->skip(1)
+                ->first();
+            $attendanceToDelete->update(['is_deleted' => self::DELETED]);
+        }
 
         BreakTime::where('attendance_id', $validatedData['attendance_id'])->delete();
 
