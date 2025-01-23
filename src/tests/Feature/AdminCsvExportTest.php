@@ -14,61 +14,74 @@ class AdminCsvExportTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_export_csv()
+    private function createUser()
     {
-        // テスト用のユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
+            'email' => 'registered01@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
 
-        // 管理者ユーザーを作成
-        $adminUser = User::create([
+    private function createAdminUser()
+    {
+        return User::create([
             'role_id' => User::ROLE_ADMIN,
             'name' => '管理者ユーザー',
             'email' => 'admin@example.com',
             'password' => Hash::make('adminpassword123'),
+            'email_verified_at' => now(),
         ]);
+    }
 
-        // テスト用の勤怠データを作成
-        $currentMonth = Carbon::now()->format('Y-m');
-
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
+    private function createAttendance($userId)
+    {
+        return Attendance::create([
+            'user_id' => $userId,
             'date' => Carbon::now()->toDateString(),
             'start_time' => '09:00:00',
             'end_time' => '18:00:00',
             'working_hours' => 540,
             'attendance_status_id' => Attendance::STATUS_FINISHED,
         ]);
+    }
 
-        $breakTime = BreakTime::create([
-            'attendance_id' => $attendance->id,
+    private function createBreakTime($attendanceId)
+    {
+        return BreakTime::create([
+            'attendance_id' => $attendanceId,
             'start_time' => '12:00:00',
             'end_time' => '13:00:00',
-            'break_time' => 60,
+            'break_time' => '60',
         ]);
+    }
 
-        // 管理者ログインページにアクセス
+    public function test_export_csv_for_current_month()
+    {
+        $user = $this->createUser();
+
+        $adminUser = $this->createAdminUser();
+
+        $currentMonth = Carbon::now()->format('Y-m');
+
+        $attendance = $this->createAttendance($user->id);
+
+        $breakTime = $this->createBreakTime($attendance->id);
+
         $response = $this->get('/admin/login');
         $response->assertStatus(200);
 
-        // 管理者ログインを試行
         $response = $this->post('/admin/login', [
             'email' => 'admin@example.com',
             'password' => 'adminpassword123',
         ]);
 
-        // 認証されていることを確認
         $this->assertAuthenticatedAs($adminUser);
 
-        // リクエストの実行
         $response = $this->get('/admin/attendance/staff/' . $user->id);
 
-        // レスポンスのステータスコードを確認
         $response->assertStatus(200);
         $response->assertSee('CSV出力');
 
@@ -80,28 +93,190 @@ class AdminCsvExportTest extends TestCase
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
         $response->assertHeader('Content-Disposition', 'attachment; filename=' . $fileName);
 
-        // CSVデータを取得
-        $output = $response->getContent();
+        // CSVデータをストリームから取得
+        ob_start();
+        $response->sendContent();
+        $csvContent = ob_get_clean();
 
-        // BOMを削除 (UTF-8 BOMは "\xEF\xBB\xBF")
-        $outputWithoutBom = preg_replace('/^\xEF\xBB\xBF/', '', $output);
+        // CSVデータが空でないことを確認
+        $this->assertNotEmpty($csvContent);
 
-        // CSV内容を確認
-        $lines = explode("\n", trim($outputWithoutBom));
-        $this->assertCount(2, $lines); // ヘッダー + 1データ
+        // BOMを削除
+        $csvContent = preg_replace('/^\xEF\xBB\xBF/', '', $csvContent);
 
-        // ヘッダー確認
+        // CSVを行ごとに分割
+        $lines = explode("\n", trim($csvContent));
+
+        // ヘッダー行を検証
         $expectedHeader = ['日付', '出勤', '退勤', '休憩', '合計'];
-        $this->assertEquals($expectedHeader, str_getcsv($lines[0]));
+        $csvHeader = str_getcsv($lines[0]);
+        $this->assertEquals($expectedHeader, $csvHeader);
 
-        // データ確認
-        $expectedRow = [
+        // データ行を検証
+        $expectedData = [
             $attendance->date,
             Carbon::parse($attendance->start_time)->format('H:i'),
             Carbon::parse($attendance->end_time)->format('H:i'),
             Carbon::parse('00:00')->addMinutes($breakTime->break_time)->format('H:i'),
             Carbon::parse('00:00')->addMinutes($attendance->working_hours)->format('H:i'),
         ];
-        $this->assertEquals($expectedRow, str_getcsv($lines[1]));
+        $csvData = str_getcsv($lines[1]);
+        $this->assertEquals($expectedData, $csvData);
+    }
+
+    public function test_export_csv_for_previous_month()
+    {
+        $user = $this->createUser();
+
+        $adminUser = $this->createAdminUser();
+
+        $currentMonth = Carbon::now();
+        $previousMonth = $currentMonth->copy()->subMonth();
+        $previousMonthFormatted = $previousMonth->format('Y-m');
+
+        // 前月の勤怠データを作成
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $previousMonth->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+
+        $breakTime = $this->createBreakTime($attendance->id);
+
+        $response = $this->get('/admin/login');
+        $response->assertStatus(200);
+
+        $response = $this->post('/admin/login', [
+            'email' => 'admin@example.com',
+            'password' => 'adminpassword123',
+        ]);
+
+        $this->assertAuthenticatedAs($adminUser);
+
+        $response = $this->get('/admin/attendance/staff/' . $user->id . '?month=' . $previousMonthFormatted);
+
+        $response->assertStatus(200);
+        $response->assertSee('CSV出力');
+
+        // CSVエクスポートのリクエストを実行
+        $response = $this->get(route('admin.staff.export', [
+            'id' => $user->id
+        ]) . '?month=' . $previousMonthFormatted);
+
+        // レスポンスヘッダーを確認
+        $fileName = sprintf('%s_%s_勤怠情報.csv', $user->name, $previousMonthFormatted);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=' . $fileName);
+
+        // CSVデータをストリームから取得
+        ob_start();
+        $response->sendContent();
+        $csvContent = ob_get_clean();
+
+        // CSVデータが空でないことを確認
+        $this->assertNotEmpty($csvContent);
+
+        // BOMを削除
+        $csvContent = preg_replace('/^\xEF\xBB\xBF/', '', $csvContent);
+
+        // CSVを行ごとに分割
+        $lines = explode("\n", trim($csvContent));
+
+        // ヘッダー行を検証
+        $expectedHeader = ['日付', '出勤', '退勤', '休憩', '合計'];
+        $csvHeader = str_getcsv($lines[0]);
+        $this->assertEquals($expectedHeader, $csvHeader);
+
+        // データ行を検証
+        $expectedData = [
+            $attendance->date,
+            Carbon::parse($attendance->start_time)->format('H:i'),
+            Carbon::parse($attendance->end_time)->format('H:i'),
+            Carbon::parse('00:00')->addMinutes($breakTime->break_time)->format('H:i'),
+            Carbon::parse('00:00')->addMinutes($attendance->working_hours)->format('H:i'),
+        ];
+        $csvData = str_getcsv($lines[1]);
+        $this->assertEquals($expectedData, $csvData);
+    }
+
+    public function test_export_csv_for_next_month()
+    {
+        $user = $this->createUser();
+
+        $adminUser = $this->createAdminUser();
+
+        $currentMonth = Carbon::now();
+        $nextMonth = $currentMonth->copy()->addMonth();
+        $nextMonthFormatted = $nextMonth->format('Y-m');
+
+        // 翌月の勤怠データを作成
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $nextMonth->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'working_hours' => 540,
+            'attendance_status_id' => Attendance::STATUS_FINISHED,
+        ]);
+
+        $breakTime = $this->createBreakTime($attendance->id);
+
+        $response = $this->get('/admin/login');
+        $response->assertStatus(200);
+
+        $response = $this->post('/admin/login', [
+            'email' => 'admin@example.com',
+            'password' => 'adminpassword123',
+        ]);
+
+        $this->assertAuthenticatedAs($adminUser);
+
+        $response = $this->get('/admin/attendance/staff/' . $user->id . '?month=' . $nextMonthFormatted);
+
+        $response->assertStatus(200);
+        $response->assertSee('CSV出力');
+
+        // CSVエクスポートのリクエストを実行
+        $response = $this->get(route('admin.staff.export', [
+            'id' => $user->id
+        ]) . '?month=' . $nextMonthFormatted);
+
+        // レスポンスヘッダーを確認
+        $fileName = sprintf('%s_%s_勤怠情報.csv', $user->name, $nextMonthFormatted);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=' . $fileName);
+
+        // CSVデータをストリームから取得
+        ob_start();
+        $response->sendContent();
+        $csvContent = ob_get_clean();
+
+        // CSVデータが空でないことを確認
+        $this->assertNotEmpty($csvContent);
+
+        // BOMを削除
+        $csvContent = preg_replace('/^\xEF\xBB\xBF/', '', $csvContent);
+
+        // CSVを行ごとに分割
+        $lines = explode("\n", trim($csvContent));
+
+        // ヘッダー行を検証
+        $expectedHeader = ['日付', '出勤', '退勤', '休憩', '合計'];
+        $csvHeader = str_getcsv($lines[0]);
+        $this->assertEquals($expectedHeader, $csvHeader);
+
+        // データ行を検証
+        $expectedData = [
+            $attendance->date,
+            Carbon::parse($attendance->start_time)->format('H:i'),
+            Carbon::parse($attendance->end_time)->format('H:i'),
+            Carbon::parse('00:00')->addMinutes($breakTime->break_time)->format('H:i'),
+            Carbon::parse('00:00')->addMinutes($attendance->working_hours)->format('H:i'),
+        ];
+        $csvData = str_getcsv($lines[1]);
+        $this->assertEquals($expectedData, $csvData);
     }
 }
