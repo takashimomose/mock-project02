@@ -244,6 +244,9 @@ class Attendance extends Model
         $formattedDate = Carbon::createFromFormat('Y年m月d日', "{$validatedData['date_year']}{$validatedData['date_day']}")
             ->format('Y-m-d');
 
+        // 対象レコードの削除
+        self::where('user_id', $userId)->where('date', $formattedDate)->delete(); // user_id と date が一致するレコード
+
         // end_time が入力されていない場合
         if (empty($validatedData['end_time'])) {
             // break_end_time 配列の最後の値を取得してチェック
