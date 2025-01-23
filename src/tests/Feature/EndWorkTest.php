@@ -13,16 +13,21 @@ class EndWorkTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_finished_work_button()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    public function test_finished_work_button()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -66,13 +71,7 @@ class EndWorkTest extends TestCase
     public function test_finished_work_time_on_admin_page()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');

@@ -12,16 +12,21 @@ class AttendanceStatusTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_status_before()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    public function test_status_before()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -49,13 +54,7 @@ class AttendanceStatusTest extends TestCase
     public function test_status_working()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -88,13 +87,7 @@ class AttendanceStatusTest extends TestCase
     public function test_status_break()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -133,13 +126,7 @@ class AttendanceStatusTest extends TestCase
     public function test_status_finished()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');

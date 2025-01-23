@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Attendance;
-use App\Models\BreakTime;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -14,16 +13,21 @@ class BreakTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_break_button()
+    private function createUser()
     {
-        // ログインのユーザーを作成
-        $user = User::create([
+        return User::create([
             'role_id' => User::ROLE_GENERAL,
             'name' => 'テストユーザー',
             'email' => 'registered@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
+    }
+
+    public function test_break_button()
+    {
+        // ログインのユーザーを作成
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -67,13 +71,7 @@ class BreakTest extends TestCase
     public function test_break_any_number_of_times()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -125,13 +123,7 @@ class BreakTest extends TestCase
     public function test_back_to_work_button()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -184,13 +176,7 @@ class BreakTest extends TestCase
     public function test_break_any_number_of_times_2()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
@@ -250,13 +236,7 @@ class BreakTest extends TestCase
     public function test_break_on_admin_page()
     {
         // ログインのユーザーを作成
-        $user = User::create([
-            'role_id' => User::ROLE_GENERAL,
-            'name' => 'テストユーザー',
-            'email' => 'registered@example.com',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUser();
 
         // ログインページへのアクセス
         $response = $this->get('/login');
