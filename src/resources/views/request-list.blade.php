@@ -39,7 +39,7 @@
                             <tr>
                                 <td>{{ $pendingCorrection['correction_status_id'] }}</td>
                                 <td>{{ $pendingCorrection['name'] }}</td>
-                                <td>{{ $pendingCorrection['date'] }}</td>
+                                <td>{{ $pendingCorrection['old_date'] }}</td>
                                 <td>{{ $pendingCorrection['reason'] }}</td>
                                 <td>{{ $pendingCorrection['request_date'] }}</td>
                                 <td>
@@ -73,7 +73,7 @@
                             <tr>
                                 <td>{{ $approvedCorrection['correction_status_id'] }}</td>
                                 <td>{{ $approvedCorrection['name'] }}</td>
-                                <td>{{ $approvedCorrection['date'] }}</td>
+                                <td>{{ $approvedCorrection['old_date'] }}</td>
                                 <td>{{ $approvedCorrection['reason'] }}</td>
                                 <td>{{ $approvedCorrection['request_date'] }}</td>
                                 <td>
