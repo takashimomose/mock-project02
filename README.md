@@ -138,7 +138,7 @@ $ php artisan storage:link
 ## 使用技術
 - PHP 7.4.9
 - Laravel 8.83.29
-- MySQL 15.1
+- MySQL 8.0.26
 
 ## URL
 - 開発環境：http://localhost/
