@@ -109,7 +109,7 @@ class AttendanceCorrection extends Model
                 'correction_id' => $correction->id,
                 'correction_status_id' => $statusLabel,
                 'name' => $correction->attendance->user->name,
-                'date' => Carbon::parse($correction->attendance->date)->format('n月j日'),
+                'date' => Carbon::parse($correction->date)->format('n月j日'),
                 'reason' => $correction->reason,
                 'request_date' => Carbon::parse($correction->request_date)->format('n月j日'),
             ];
