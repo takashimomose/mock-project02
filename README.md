@@ -161,7 +161,7 @@ php artisan test --testsuite=Feature
 ・特定のテストファイルを実行する場合：
 
 ```bash
-vendor/bin/phpunit tests/Unit/<ファイル名>
+vendor/bin/phpunit tests/Feature/<ファイル名>
 ```
 
 もしくは
