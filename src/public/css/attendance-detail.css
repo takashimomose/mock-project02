@@ -83,6 +83,7 @@
     border: none;
     float: right;
     margin-top: 80px;
+    margin-bottom: 20px;
 }
 
 .edit-btn:hover {
